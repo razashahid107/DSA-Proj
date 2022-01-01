@@ -51,8 +51,8 @@ class MovieNode // node of a doubly linked list
 {
 public:
     Movie data;
-    MovieNode *next = NULL;
-    MovieNode *prev = NULL;
+    MovieNode *next;
+    MovieNode *prev;
 };
 
 /* class of a doubly linked list to store movies */
@@ -82,14 +82,15 @@ void MovieList::ReadCSV()
 {
     int count = 0;
     ifstream inputFile;
-    inputFile.open("D:\\OneDrive - National University of Sciences & Technology\\Ali\\3rd Semester\\IMDB_Top5000-SEECS.csv");
+    inputFile.open(".//1.csv");
     string line = "";
-    MovieNode *tempMovie = new MovieNode();
+        // tempMovie = NULL;
+
 
     // parsing of each row in data part of MovieNode i.e Movie
     while (getline(inputFile, line))
     {
-
+        MovieNode *tempMovie = new MovieNode();
         stringstream inputString(line);
         /* temporary string that will be used to convert string to numeric data types */
         string converterString;
@@ -177,7 +178,7 @@ void MovieList::ReadCSV()
 
         getline(inputString, tempMovie->data.color, ',');
 
-        cout << ++count << ". Title: " << tempMovie->data.title << " Genre: " << tempMovie->data.year << endl;
+        // cout << ++count << ". Title: " << tempMovie->data.title << " Genre: " << tempMovie->data.year << endl;
 
         insertNode(tempMovie);
     }
@@ -188,12 +189,15 @@ void MovieList::insertNode(MovieNode *tempMovie)
     /* if DLL is empty */
     if (isEmpty())
     {
+        cout << "this executed" << endl;
         start = tempMovie;
         last = tempMovie;
     }
     /* if DLL contains only 1 node */
     else if (start == last)
     {
+        // cout << "this executed 2" << endl;
+
         last = tempMovie;
         start->next = last;
         last->prev = start;
