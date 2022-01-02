@@ -223,6 +223,7 @@ void MovieList::Parser()
         int tempInt;
         getline(inputString, tempMovie->data.title, ',');
         getline(inputString, tempMovie->data.genre, ',');
+    
 
         // converting year to int
         getline(inputString, tempString, ',');
