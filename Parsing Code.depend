@@ -8,3 +8,16 @@
 
 1640899793 d:\onedrive - national university of sciences & technology\ali\3rd semester\dsa parsing\parsing code\sll.h
 
+1641076040 source:d:\onedrive - national university of sciences & technology\ali\3rd semester\dsa parsing\dsa-proj\sll.cpp
+	"SLL.h"
+	<iostream>
+
+1641076040 d:\onedrive - national university of sciences & technology\ali\3rd semester\dsa parsing\dsa-proj\sll.h
+
+1641084521 source:d:\onedrive - national university of sciences & technology\ali\3rd semester\dsa parsing\dsa-proj\main.cpp
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"SLL.h"
+
