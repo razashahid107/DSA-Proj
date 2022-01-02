@@ -81,10 +81,12 @@ class Actor
 public:
     string name;
     unsigned short int fb_likes;
+    unsigned int countOfMovies = 0;
     MoviesActedIn *startOfList;
     MoviesActedIn *ploc = NULL;
     MoviesActedIn *loc = NULL;
     void insertActedMovies(Movie *ptrToMovie);
+    /* 1. Function that prints details of an actor */
     void printActedMovies();
 };
 
@@ -223,7 +225,6 @@ void MovieList::Parser()
         int tempInt;
         getline(inputString, tempMovie->data.title, ',');
         getline(inputString, tempMovie->data.genre, ',');
-    
 
         // converting year to int
         getline(inputString, tempString, ',');
@@ -350,6 +351,9 @@ void MovieList::Parser()
         // cout << count << ". Title: " << tempMovie->data.title << " Genre: " << tempMovie->data.year << endl;
 
         insertNode(tempMovie);
+
+        tempString.clear();
+        tempString2.clear();
     }
 };
 
@@ -412,6 +416,7 @@ void Movie::printActorsOfMovie()
 void Actor::insertActedMovies(Movie *ptrToMovie)
 {
     MoviesActedIn *newMovie = new MoviesActedIn();
+    countOfMovies++;
     newMovie->data = ptrToMovie;
     newMovie->next = NULL;
     if (startOfList == NULL)
@@ -430,11 +435,14 @@ void Actor::insertActedMovies(Movie *ptrToMovie)
 void Actor::printActedMovies()
 {
     int count = 0;
+    cout << "Actor name: " << name << endl;
+    cout << "Movies shooted: " << countOfMovies << endl
+         << endl;
     cout << name << " has acted in following movies." << endl;
     loc = startOfList;
     while (loc != NULL)
     {
-        cout << ++count << " " << loc->data->title << endl;
+        cout << ++count << ". " << loc->data->title << " (" << loc->data->year << ")" << endl;
         loc = loc->next;
     }
 }
@@ -465,7 +473,7 @@ void Director::printDirectedMovies()
     loc = startOfList;
     while (loc != NULL)
     {
-        cout << ++count << " " << loc->data->title << endl;
+        cout << ++count << ". " << loc->data->title << endl;
         loc = loc->next;
     }
 }
@@ -574,11 +582,9 @@ int main()
 {
     MovieList m;
     m.Parser();
-    cout << "title: " << m.start->data.title << endl;
-    cout << "title: " << m.last->data.title << endl;
 
-    if (globalListOfDirectors->SearchDirector("Bryan Singer"))
-        globalListOfDirectors->loc->data.printDirectedMovies();
+    if (globalListOfActors->SearchActor("Tom Cruise"))
+        globalListOfActors->loc->data.printActedMovies();
     else
         cout << "Not Found" << endl;
 }
