@@ -40,7 +40,6 @@ public:
     Actor *data;
     ActorsInMovie *next;
 };
-
 class Movie
 {
 public:
@@ -73,28 +72,10 @@ public:
     unsigned int movie_fb_likes;
     bool color; // bool
 
-    void insertActor(Actor *ptrToActor)
-    {
-        ActorsInMovie *loc;
-        ActorsInMovie *ploc;
-        ActorsInMovie *newActor = new ActorsInMovie();
-        newActor->data = ptrToActor;
-        newActor->next = NULL;
-        if (startOfListOfActors == NULL)
-            startOfListOfActors = newActor;
-        else
-        {
-            loc = startOfListOfActors;
-            while (loc != NULL)
-            {
-                ploc = loc;
-                loc = loc->next;
-            }
-            ploc->next = newActor;
-        }
-    }
+    void insertActorInMovie(Actor *ptrToActor);
+    void printActorsOfMovie();
 };
-/* class definitions */
+
 class Actor
 {
 public:
@@ -103,36 +84,11 @@ public:
     MoviesActedIn *startOfList;
     MoviesActedIn *ploc = NULL;
     MoviesActedIn *loc = NULL;
-    void insertActedMovies(Movie *ptrToMovie)
-    {
-        MoviesActedIn *newMovie = new MoviesActedIn();
-        newMovie->data = ptrToMovie;
-        newMovie->next = NULL;
-        if (startOfList == NULL)
-            startOfList = newMovie;
-        else
-        {
-            loc = startOfList;
-            while (loc != NULL)
-            {
-                ploc = loc;
-                loc = loc->next;
-            }
-            ploc->next = newMovie;
-        }
-    }
-    void printActedMovies()
-    {
-        int count = 0;
-        cout << name << " has directed the following movies." << endl;
-        loc = startOfList;
-        while (loc != NULL)
-        {
-            cout << ++count << " " << loc->data->title << endl;
-            loc = loc->next;
-        }
-    }
+    void insertActedMovies(Movie *ptrToMovie);
+    void printActedMovies();
 };
+
+/* class definitions */
 
 class ActorNode
 {
@@ -149,63 +105,21 @@ public:
     ActorNode *ploc = NULL;
     ActorNode *loc = NULL;
     /* user-defined functions */
+
+    /* function to check if tree is empty */
     bool isEmpty() { return root == NULL; }
 
     // an insert function to insert new actor nodes
-    ActorNode *InsertActor(string name, unsigned short int fb_likes)
-    {
-        if (isEmpty()) // inserting in an empty tree
-        {
-            ActorNode *newNode = new ActorNode();
-            newNode->data.name = name;
-            newNode->data.fb_likes = fb_likes;
-            root = newNode;
-            return newNode;
-        }
-        else
-        {
-            SearchActor(name);
-            if (loc != NULL) // Actor found, no need to insert
-                return loc;
-            // else a new node of the actor will be added to the list
-            ActorNode *newNode = new ActorNode();
-            newNode->data.name = name;
-            newNode->data.fb_likes = fb_likes;
-            if (ploc->data.name > name)
-                ploc->left = newNode;
-            else if (ploc->data.name < name)
-                ploc->right = newNode;
+    ActorNode *InsertActor(string name, unsigned short int fb_likes);
+    /* If Tree is empty or the director node is not found
+    it will insert a newNode of DirectorNode type and return the node's address
+    however if the directorNode was already found in search function,
+    then it will only return the node's address */
 
-            return newNode;
-        }
-    }
-    // a search function to search actors by name
+    bool SearchActor(string name);
     /* If the actor is found in the tree
-    the function will return its address
-
-    else
-    the function will return address of its logical (by name)  pre-decessor */
-    void SearchActor(string name)
-    {
-        if (!isEmpty())
-        {
-            loc = root;
-            ploc = NULL;
-            while (loc != NULL)
-            {
-                if (name != loc->data.name) // keep traversing if node not found
-                {
-                    ploc = loc;
-                    if (name < loc->data.name)
-                        loc = loc->left;
-                    else if (name > loc->data.name)
-                        loc = loc->right;
-                }
-                else // return if node found, loc contains address of node
-                    return;
-            }
-        }
-    }
+    the function will return true
+    else the function will return false*/
 };
 
 class MoviesDirected
@@ -223,35 +137,9 @@ public:
     MoviesDirected *startOfList = NULL;
     MoviesDirected *ploc = NULL;
     MoviesDirected *loc = NULL;
-    void insertDirectedMovies(Movie *ptrToMovie)
-    {
-        MoviesDirected *newMovie = new MoviesDirected();
-        newMovie->data = ptrToMovie;
-        newMovie->next = NULL;
-        if (startOfList == NULL)
-            startOfList = newMovie;
-        else
-        {
-            loc = startOfList;
-            while (loc != NULL)
-            {
-                ploc = loc;
-                loc = loc->next;
-            }
-            ploc->next = newMovie;
-        }
-    }
-    void printDirectedMovies()
-    {
-        int count = 0;
-        cout << name << " has directed the following movies." << endl;
-        loc = startOfList;
-        while (loc != NULL)
-        {
-            cout << ++count << " " << loc->data->title << endl;
-            loc = loc->next;
-        }
-    }
+    void insertDirectedMovies(Movie *ptrToMovie);
+    /* 6. Function that prints all the movies directed by a director */
+    void printDirectedMovies();
 };
 
 class DirectorNode
@@ -269,64 +157,20 @@ public:
     DirectorNode *ploc = NULL;
     DirectorNode *loc = NULL;
     /* user-defined functions */
+
+    /* function to check if tree is empty */
     bool isEmpty() { return root == NULL; }
 
-    // an insert function to insert new director nodes and return their address
-    DirectorNode *InsertDirector(string name, unsigned short int fb_likes)
-    {
-        if (isEmpty()) // inserting in an empty tree
-        {
-            DirectorNode *newNode = new DirectorNode();
-            newNode->data.name = name;
-            newNode->data.fb_likes = fb_likes;
-            root = newNode;
-            return newNode;
-        }
-        else
-        {
-            SearchDirector(name);
-            if (loc != NULL) // Director found, no need to insert
-                return loc;
-            // else a new node of the director will be added to the list
-            DirectorNode *newNode = new DirectorNode();
-            newNode->data.name = name;
-            newNode->data.fb_likes = fb_likes;
-            if (ploc->data.name > name)
-                ploc->left = newNode;
-            else if (ploc->data.name < name)
-                ploc->right = newNode;
+    DirectorNode *InsertDirector(string name, unsigned short int fb_likes);
+    /* If Tree is empty or the director node is not found
+    it will insert a newNode of DirectorNode type and return the node's address
+    however if the directorNode was already found in search function,
+    then it will only return the node's address */
 
-            return newNode;
-        }
-    }
-
-    // a search function to search directors by name
+    bool SearchDirector(string name);
     /* If the director is found in the tree
-    the function will return its address
-
-    else
-    the function will return address of its logical (by name)  pre-decessor */
-    void SearchDirector(string name)
-    {
-        if (!isEmpty())
-        {
-            loc = root;
-            ploc = NULL;
-            while (loc != NULL)
-            {
-                if (name != loc->data.name) // keep traversing if node not found
-                {
-                    ploc = loc;
-                    if (name < loc->data.name)
-                        loc = loc->left;
-                    else if (name > loc->data.name)
-                        loc = loc->right;
-                }
-                else // return if node found, loc contains address of node
-                    return;
-            }
-        }
-    }
+    the function will return true
+    else the function will return false*/
 };
 ActorTree *globalListOfActors = new ActorTree();
 DirectorTree *globalListOfDirectors = new DirectorTree();
@@ -365,7 +209,7 @@ void MovieList::Parser()
 {
     int count = 0;
     ifstream inputFile;
-    inputFile.open(".//1.csv");
+    inputFile.open(".//12.csv");
     string line = "";
 
     /* global list of actors and directors is made */
@@ -408,7 +252,7 @@ void MovieList::Parser()
 
         tempMovie->data.ptrToDir->insertDirectedMovies(&tempMovie->data); // adding movie nodes in director's directed movies
 
-        cout << "The director of " << tempMovie->data.ptrToDir->startOfList->data->title << " is " << tempMovie->data.ptrToDir->name << endl;
+        // cout << "The director of " << tempMovie->data.ptrToDir->startOfList->data->title << " is " << tempMovie->data.ptrToDir->name << endl;
         /* END: parsing of director ends here */
 
         // converting crtic for views to int
@@ -420,36 +264,32 @@ void MovieList::Parser()
         tempMovie->data.duration = atoi(tempString.c_str());
 
         /* START: parsing of actor into ActorNode starts here */
-        getline(inputString, tempString, ',');
-
-        // converting actor 1 fb likes to int
-        getline(inputString, tempString2, ',');
-        tempInt = atoi(tempString.c_str());
-        /* create a new ActorsInMovie list that contains list of actors of this movie
-        parse name of actor1, and search it in global list of actors
-
-        if found, insert pointer of his node to ActorsInMovie
-        update moviesActedIn for that actor
-
-        if not found, insert a new node of Actor type in global list of actors
-        insert pointer of his node to ActorsInMovie
-        update actor name, fb likes, moviesActedIn for that actor
-        */
-
         ActorNode *tempActorNode;
-        tempActorNode = globalListOfActors->InsertActor(tempString, tempInt); // inserting actor in global list of actor
+        for (int i = 0; i < 3; i++)
+        {
+            getline(inputString, tempString, ',');
 
-        tempMovie->data.insertActor(&(tempActorNode->data)); // inserting actor in actor list
+            // converting actor 1 fb likes to int
+            getline(inputString, tempString2, ',');
+            tempInt = atoi(tempString.c_str());
+            /* create a new ActorsInMovie list that contains list of actors of this movie
+            parse name of actor1, and search it in global list of actors
 
-        tempActorNode->data.insertActedMovies(&tempMovie->data);
+            if found, insert pointer of his node to ActorsInMovie
+            update moviesActedIn for that actor
 
-        cout << "The first actor of this movie is " << tempMovie->data.startOfListOfActors->data->name << endl
-             << endl;
+            if not found, insert a new node of Actor type in global list of actors
+            insert pointer of his node to ActorsInMovie
+            update actor name, fb likes, moviesActedIn for that actor
+            */
 
-        /* repeat the same process for next 2 actors
-       to do so, update the next pointer of ActorsInMovie*/
+            tempActorNode = globalListOfActors->InsertActor(tempString, tempInt); // inserting actor in global list of actor
 
-        /* line 233 to line 250 will be edited using logic on line 219 */
+            tempMovie->data.insertActorInMovie(&(tempActorNode->data)); // inserting actor in actor list
+
+            tempActorNode->data.insertActedMovies(&tempMovie->data);
+        }
+        /* END:  parsing of actor into ActorNode ends here */
 
         getline(inputString, tempString, ',');
 
@@ -535,6 +375,200 @@ void MovieList::insertNode(MovieNode *tempMovie)
         last = tempMovie;
     }
 }
+
+void Movie::insertActorInMovie(Actor *ptrToActor)
+{
+    ActorsInMovie *loc;
+    ActorsInMovie *ploc;
+    ActorsInMovie *newActor = new ActorsInMovie();
+    newActor->data = ptrToActor;
+    newActor->next = NULL;
+    if (startOfListOfActors == NULL)
+        startOfListOfActors = newActor;
+    else
+    {
+        loc = startOfListOfActors;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newActor;
+    }
+}
+void Movie::printActorsOfMovie()
+{
+    ActorsInMovie *loc = startOfListOfActors;
+    int count = 0;
+    cout << "The actors of this movie are: " << endl;
+    while (loc != NULL)
+    {
+        cout << ++count << ". " << loc->data->name << endl;
+        loc = loc->next;
+    }
+}
+
+void Actor::insertActedMovies(Movie *ptrToMovie)
+{
+    MoviesActedIn *newMovie = new MoviesActedIn();
+    newMovie->data = ptrToMovie;
+    newMovie->next = NULL;
+    if (startOfList == NULL)
+        startOfList = newMovie;
+    else
+    {
+        loc = startOfList;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newMovie;
+    }
+}
+void Actor::printActedMovies()
+{
+    int count = 0;
+    cout << name << " has acted in following movies." << endl;
+    loc = startOfList;
+    while (loc != NULL)
+    {
+        cout << ++count << " " << loc->data->title << endl;
+        loc = loc->next;
+    }
+}
+
+void Director::insertDirectedMovies(Movie *ptrToMovie)
+{
+    MoviesDirected *newMovie = new MoviesDirected();
+    newMovie->data = ptrToMovie;
+    newMovie->next = NULL;
+    if (startOfList == NULL)
+        startOfList = newMovie;
+    else
+    {
+        loc = startOfList;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newMovie;
+    }
+}
+void Director::printDirectedMovies()
+{
+
+    int count = 0;
+    cout << name << " has directed the following movies." << endl;
+    loc = startOfList;
+    while (loc != NULL)
+    {
+        cout << ++count << " " << loc->data->title << endl;
+        loc = loc->next;
+    }
+}
+
+ActorNode *ActorTree::InsertActor(string name, unsigned short int fb_likes)
+{
+    if (isEmpty()) // inserting in an empty tree
+    {
+        ActorNode *newNode = new ActorNode();
+        newNode->data.name = name;
+        newNode->data.fb_likes = fb_likes;
+        root = newNode;
+        return newNode;
+    }
+    else
+    {
+        SearchActor(name);
+        if (loc != NULL) // Actor found, no need to insert
+            return loc;
+        // else a new node of the actor will be added to the list
+        ActorNode *newNode = new ActorNode();
+        newNode->data.name = name;
+        newNode->data.fb_likes = fb_likes;
+        if (ploc->data.name > name)
+            ploc->left = newNode;
+        else if (ploc->data.name < name)
+            ploc->right = newNode;
+
+        return newNode;
+    }
+}
+bool ActorTree::SearchActor(string name)
+{
+    if (!isEmpty())
+    {
+        loc = root;
+        ploc = NULL;
+        while (loc != NULL)
+        {
+            if (name != loc->data.name) // keep traversing if node not found
+            {
+                ploc = loc;
+                if (name < loc->data.name)
+                    loc = loc->left;
+                else if (name > loc->data.name)
+                    loc = loc->right;
+            }
+            else // return if node found, loc contains address of node
+                return true;
+        }
+    }
+    return false;
+}
+
+DirectorNode *DirectorTree::InsertDirector(string name, unsigned short int fb_likes)
+{
+    if (isEmpty()) // inserting in an empty tree
+    {
+        DirectorNode *newNode = new DirectorNode();
+        newNode->data.name = name;
+        newNode->data.fb_likes = fb_likes;
+        root = newNode;
+        return newNode;
+    }
+    else
+    {
+        SearchDirector(name);
+        if (loc != NULL) // Director found, no need to insert
+            return loc;
+        // else a new node of the director will be added to the list
+        DirectorNode *newNode = new DirectorNode();
+        newNode->data.name = name;
+        newNode->data.fb_likes = fb_likes;
+        if (ploc->data.name > name)
+            ploc->left = newNode;
+        else if (ploc->data.name < name)
+            ploc->right = newNode;
+
+        return newNode;
+    }
+}
+bool DirectorTree::SearchDirector(string name)
+{
+    if (!isEmpty())
+    {
+        loc = root;
+        ploc = NULL;
+        while (loc != NULL)
+        {
+            if (name != loc->data.name) // keep traversing if node not found
+            {
+                ploc = loc;
+                if (name < loc->data.name)
+                    loc = loc->left;
+                else if (name > loc->data.name)
+                    loc = loc->right;
+            }
+            else // return if node found, loc contains address of node
+                return true;
+        }
+    }
+    return false;
+}
+
 int main()
 {
     MovieList m;
@@ -542,6 +576,8 @@ int main()
     cout << "title: " << m.start->data.title << endl;
     cout << "title: " << m.last->data.title << endl;
 
-    globalListOfDirectors->SearchDirector("Bryan Singer");
-    globalListOfDirectors->loc->data.printDirectedMovies();
+    if (globalListOfDirectors->SearchDirector("Bryan Singer"))
+        globalListOfDirectors->loc->data.printDirectedMovies();
+    else
+        cout << "Not Found" << endl;
 }
