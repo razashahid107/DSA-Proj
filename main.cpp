@@ -23,10 +23,14 @@ class DirectorTree;   // BST of DirectorNode
 class MoviesDirected; // a list to store pointer of all movies which are directed by a particular director
 
 // classes relevant to movies
-class Movie;         // Movie data type
-class MovieNode;     // node of MovieList, its data part is the Movie class
-class MovieList;     // doubly linked list of MovieNode
-class ActorsInMovie; // a list to store pointer of all actors who have acted in a movie
+class Movie;          // Movie data type
+class MovieNode;      // node of MovieList, its data part is the Movie class
+class MovieList;      // doubly linked list of MovieNode
+class ActorsInMovie;  // a node of a list that stores pointer of all actors who have acted in a movie
+class YearWiseList;   // a list to store movies in ascending order of year released
+class YearWiseNode;   // node of the above class
+class RatingWiseList; // a list to store movies in ascending order of rating
+class RatingWiseNode; // node of the above class
 
 class MoviesActedIn
 {
@@ -85,9 +89,17 @@ public:
     MoviesActedIn *startOfList;
     MoviesActedIn *ploc = NULL;
     MoviesActedIn *loc = NULL;
+    string tempCoActor1;
+    string tempCoActor2;
     void insertActedMovies(Movie *ptrToMovie);
     /* 1. Function that prints details of an actor */
     void printActedMovies();
+    /* Function that finds the co-Actors of an actor in a specific movie */
+    void findCoActors(MoviesActedIn *loc);
+    /* 2. Print Co Actors of an actor and the movie they acted in */
+    void printCoActors();
+    /* 5. Check whether 2 actors are coActors */
+    void checkAandB(string actor2);
 };
 
 /* class definitions */
@@ -174,6 +186,7 @@ public:
     the function will return true
     else the function will return false*/
 };
+/* declaring global list of actors and directors */
 ActorTree *globalListOfActors = new ActorTree();
 DirectorTree *globalListOfDirectors = new DirectorTree();
 
@@ -206,6 +219,49 @@ public:
     void insertNode(MovieNode *tempMovie);
 };
 
+class YearWiseList
+{
+public:
+    YearWiseNode *start = NULL;
+    YearWiseNode *ploc = NULL;
+    YearWiseNode *loc = NULL;
+    bool isEmpty();
+    void searchNode(int year);
+    void insertSorted(Movie *newMovie);
+    /* 10. a) Prints movie titles increasing year-wise */
+    void printMoviesYearWise();
+    /* 9. Prints all movie titles released in the given year */
+    void printFromYear(int year);
+};
+
+class YearWiseNode
+{
+public:
+    Movie *data;
+    YearWiseNode *next = NULL;
+};
+
+class RatingWiseList
+{
+public:
+    RatingWiseNode *start = NULL;
+    RatingWiseNode *ploc = NULL;
+    RatingWiseNode *loc = NULL;
+    bool isEmpty();
+    void searchNode(float rating);
+    void insertSorted(Movie *newMovie);
+    /* 12. Prints movies from highest to lowest rating. */
+    void printMoviesRatingWise();
+};
+class RatingWiseNode
+{
+public:
+    Movie *data;
+    RatingWiseNode *next = NULL;
+};
+
+YearWiseList *globalListOfYearWiseMovies = new YearWiseList();
+RatingWiseList *globalListOfRatingWiseMovies = new RatingWiseList();
 bool MovieList::isEmpty() { return start == NULL; }
 void MovieList::Parser()
 {
@@ -351,7 +407,8 @@ void MovieList::Parser()
         // cout << count << ". Title: " << tempMovie->data.title << " Genre: " << tempMovie->data.year << endl;
 
         insertNode(tempMovie);
-
+        globalListOfYearWiseMovies->insertSorted(&tempMovie->data);
+        globalListOfRatingWiseMovies->insertSorted(&tempMovie->data);
         tempString.clear();
         tempString2.clear();
     }
@@ -435,16 +492,70 @@ void Actor::insertActedMovies(Movie *ptrToMovie)
 void Actor::printActedMovies()
 {
     int count = 0;
+
     cout << "Actor name: " << name << endl;
     cout << "Movies shooted: " << countOfMovies << endl
          << endl;
     cout << name << " has acted in following movies." << endl;
+
     loc = startOfList;
     while (loc != NULL)
     {
         cout << ++count << ". " << loc->data->title << " (" << loc->data->year << ")" << endl;
         loc = loc->next;
     }
+}
+void Actor::findCoActors(MoviesActedIn *loc)
+{
+    if (loc->data->startOfListOfActors->data->name == name)
+    {
+        tempCoActor1 = loc->data->startOfListOfActors->next->data->name;
+        tempCoActor2 = loc->data->startOfListOfActors->next->next->data->name;
+    }
+    else if (loc->data->startOfListOfActors->next->data->name == name)
+    {
+        tempCoActor1 = loc->data->startOfListOfActors->data->name;
+        tempCoActor2 = loc->data->startOfListOfActors->next->next->data->name;
+    }
+    else
+    {
+        tempCoActor1 = loc->data->startOfListOfActors->data->name;
+        tempCoActor2 = loc->data->startOfListOfActors->next->data->name;
+    }
+}
+void Actor::printCoActors()
+{
+    cout << name << " has acted in following movies with following actors." << endl
+         << endl;
+    loc = startOfList;
+
+    while (loc != NULL)
+    {
+        findCoActors(loc);
+
+        cout << "Movie name: " << loc->data->title << " (" << loc->data->year << ")" << endl
+             << "Co-Actors: " << tempCoActor1 << " & " << tempCoActor2 << endl
+             << endl;
+
+        loc = loc->next;
+    }
+}
+void Actor::checkAandB(string actor2)
+{
+    loc = startOfList;
+    bool areCoActors = false;
+    while (loc != NULL)
+    {
+        findCoActors(loc);
+        if (actor2 == tempCoActor1 || actor2 == tempCoActor2)
+        {
+            areCoActors = true;
+            cout << name << " & " << actor2 << " have acted together in " << loc->data->title << "." << endl;
+        }
+        loc = loc->next;
+    }
+    if (!areCoActors)
+        cout << name << " & " << actor2 << " are not Co-Actors." << endl;
 }
 
 void Director::insertDirectedMovies(Movie *ptrToMovie)
@@ -578,13 +689,145 @@ bool DirectorTree::SearchDirector(string name)
     return false;
 }
 
+bool YearWiseList::isEmpty() { return start == NULL; }
+void YearWiseList::insertSorted(Movie *newMovie)
+{
+    YearWiseNode *newNode = new YearWiseNode();
+    newNode->data = newMovie;
+    searchNode(newMovie->year);
+    if (isEmpty())
+    {
+        start = newNode;
+        newNode->next = NULL;
+    }
+    else
+    {
+        if (ploc == NULL) // case when newNode will be first node (list is not empty)
+        {
+            newNode->next = start;
+            start = newNode;
+        }
+        else if (loc == NULL && ploc != NULL) // case when the newNode will be the last node
+        {
+            ploc->next = newNode;
+            newNode->next = NULL;
+        }
+        else if (loc != NULL && ploc != NULL) // case when newNode will be inserted somewhere in middle
+        {
+            ploc->next = newNode;
+            newNode->next = loc;
+        }
+    }
+}
+void YearWiseList::searchNode(int year)
+{
+    if (!isEmpty())
+    {
+        loc = start;
+        ploc == NULL;
+
+        while (loc->data->year <= year)
+        { /* keep traversing until greater year is found
+          if greater year is not found then ploc = last node*/
+            ploc = loc;
+            loc = loc->next;
+            if (loc == NULL)
+                break;
+        }
+        // now ploc is the predecessor of movie node
+    }
+}
+void YearWiseList::printMoviesYearWise()
+{
+    loc = start;
+    while (loc != NULL)
+    {
+        if (loc->data->year == 0)
+            cout << "Year: NOT IN RECORD Title: " << loc->data->title << endl;
+        else
+            cout << "Year: " << loc->data->year << " Title: " << loc->data->title << endl;
+        loc = loc->next;
+    }
+}
+void YearWiseList::printFromYear(int year)
+{
+    loc = start;
+    while (loc != NULL)
+    {
+        if (loc->data->year == year)
+            cout << "Year: " << loc->data->year << " Title: " << loc->data->title << endl;
+        if (loc->data->year > year)
+            break;
+        loc = loc->next;
+    }
+}
+
+bool RatingWiseList::isEmpty() { return start == NULL; }
+void RatingWiseList::insertSorted(Movie *newMovie)
+{
+    RatingWiseNode *newNode = new RatingWiseNode();
+    newNode->data = newMovie;
+    searchNode(newMovie->imdb_score);
+    if (isEmpty())
+    {
+        start = newNode;
+        newNode->next = NULL;
+    }
+    else
+    {
+        if (ploc == NULL) // case when newNode will be first node (list is not empty)
+        {
+            newNode->next = start;
+            start = newNode;
+        }
+        else if (loc == NULL && ploc != NULL) // case when the newNode will be the last node
+        {
+            ploc->next = newNode;
+            newNode->next = NULL;
+        }
+        else if (loc != NULL && ploc != NULL) // case when newNode will be inserted somewhere in middle
+        {
+            ploc->next = newNode;
+            newNode->next = loc;
+        }
+    }
+}
+void RatingWiseList::searchNode(float rating)
+{
+    if (!isEmpty())
+    {
+        loc = start;
+        ploc = NULL;
+
+        while (loc->data->imdb_score >= rating)
+        { /* keep traversing until greater year is found
+          if greater year is not found then ploc = last node*/
+            ploc = loc;
+            loc = loc->next;
+            if (loc == NULL)
+                break;
+        }
+        // now ploc is the predecessor of movie node
+    }
+}
+
+void RatingWiseList::printMoviesRatingWise()
+{
+    loc = start;
+    while (loc != NULL)
+    {
+        if (loc->data->imdb_score == 0)
+            cout << "Rating: NOT IN RECORD Title: " << loc->data->title << endl;
+        else
+            cout << "Title: " << loc->data->title << " Rating: " << loc->data->imdb_score << endl;
+        loc = loc->next;
+    }
+}
+
 int main()
 {
     MovieList m;
     m.Parser();
-
-    if (globalListOfActors->SearchActor("Tom Cruise"))
-        globalListOfActors->loc->data.printActedMovies();
-    else
-        cout << "Not Found" << endl;
+    globalListOfRatingWiseMovies->printMoviesRatingWise();
+    // globalListOfYearWiseMovies->printFromYear(2016);
 }
