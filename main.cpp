@@ -1,3 +1,11 @@
+/* things to do at end */
+// function that prints movies votes wise
+// function that prints movies duration wise
+// implement recursion where possible
+// make search functions non-case sensitive
+
+/* genre insertion */
+/*  */
 /* header files */
 #include <iostream>
 #include <string>
@@ -7,9 +15,12 @@
 
 using namespace std;
 
-/* forward declaration of all classes */
+/* FORWARD DECLARATION OF ALL CLASSES */
 
 // classes relevant to actors
+
+string convertToLower(string line);
+int countCharInAString(string line, char c);
 
 class Actor;         // Actor data type
 class ActorNode;     // node of ActorTree
@@ -32,6 +43,11 @@ class YearWiseNode;   // node of the above class
 class RatingWiseList; // a list to store movies in ascending order of rating
 class RatingWiseNode; // node of the above class
 
+//classes relevant to genre
+class Genre;
+
+/* CLASS DEFINITIONS */
+
 class MoviesActedIn
 {
 public:
@@ -49,7 +65,27 @@ class Movie
 public:
     string title;
 
-    string genre; // enum
+    /*  tempString contains all genres
+    we count '|' in tempString
+    sizeOfGenre = count+1
+    string tempGenre
+    dynamic string array of genres created (size is sizeofgenre)
+
+    stringstream genreString(tempString);
+
+    loop this logic sizeOfGenre times:
+        getline(genreString, tempGenre, '|')
+        if(i == sizeOfGenre)
+            getline(genreString, arrayOfGenre[i], ',')
+
+        arrayOfGenre[i] = convertStringToEnum(tempGenre)
+
+    end of loop
+
+    ptrToGenreList = &arrayOfGenre;
+     */
+    string genre; // will be converted to dynamic array of string
+
     unsigned short int year;
     float imdb_score;
 
@@ -65,7 +101,7 @@ public:
     unsigned int cast_total_fb_likes;
     unsigned short int facenumber_in_poster;
 
-    string keywords; //
+    string keywords; // will be converted to dynamic array of string
     string imdb_link;
     unsigned short int num_user_reviews;
     string language; // enum
@@ -74,7 +110,7 @@ public:
     long budget;
     float aspect_ratio;
     unsigned int movie_fb_likes;
-    bool color; // bool
+    bool color;
 
     void insertActorInMovie(Actor *ptrToActor);
     void printActorsOfMovie();
@@ -186,9 +222,7 @@ public:
     the function will return true
     else the function will return false*/
 };
-/* declaring global list of actors and directors */
-ActorTree *globalListOfActors = new ActorTree();
-DirectorTree *globalListOfDirectors = new DirectorTree();
+
 
 class MovieNode
 {
@@ -260,8 +294,51 @@ public:
     RatingWiseNode *next = NULL;
 };
 
+class Genre
+{
+    public:
+    enum genre
+    {
+        Action,
+        Adventure,
+        Animation,
+        Biography,
+        Comedy,
+        Crime,
+        Documentary,
+        Drama,
+        Family,
+        Fantasy,
+        FilmNoir,
+        History,
+        Horror,
+        Music,
+        Musical,
+        Mystery,
+        Romance,
+        SciFi,
+        Short,
+        Sport,
+        Superhero,
+        Thriller,
+        War,
+        Western,
+    };
+    string convertEnumToString(int eNumber); 
+    int convertStringToEnum(string genre);
+};
+
+
+/* GLOBAL VARIABLE LISTS */
+ActorTree *globalListOfActors = new ActorTree();
+DirectorTree *globalListOfDirectors = new DirectorTree();
 YearWiseList *globalListOfYearWiseMovies = new YearWiseList();
 RatingWiseList *globalListOfRatingWiseMovies = new RatingWiseList();
+
+
+
+/* FUNCTION DEFINITIONS OF CLASS FUNCTIONS*/
+
 bool MovieList::isEmpty() { return start == NULL; }
 void MovieList::Parser()
 {
@@ -412,7 +489,7 @@ void MovieList::Parser()
         tempString.clear();
         tempString2.clear();
     }
-};
+}
 
 void MovieList::insertNode(MovieNode *tempMovie)
 {
@@ -724,7 +801,7 @@ void YearWiseList::searchNode(int year)
     if (!isEmpty())
     {
         loc = start;
-        ploc == NULL;
+        ploc = NULL;
 
         while (loc->data->year <= year)
         { /* keep traversing until greater year is found
@@ -824,10 +901,33 @@ void RatingWiseList::printMoviesRatingWise()
     }
 }
 
+
+/* GLOBAL FUNCTIONS */
+string convertToLower(string line)
+{
+    string temp = line;
+    for (int i = 0; temp[i] != '\0'; i++)
+    {
+        // convert temp[i] to lowercase
+        temp[i] = tolower(temp[i]);
+    }
+    return temp;
+}
+int countCharInAString(string line, char c)
+{
+    int count = 0;
+    for (int i = 0; line[i] != '\0'; i++)
+    {
+        if (line[i] == c)
+            count++;
+    }
+    return count;
+}
 int main()
 {
     MovieList m;
     m.Parser();
-    globalListOfRatingWiseMovies->printMoviesRatingWise();
-    // globalListOfYearWiseMovies->printFromYear(2016);
+
+    globalListOfActors->SearchActor("Tom Cruise");
+    globalListOfActors->loc->data.printCoActors();
 }
