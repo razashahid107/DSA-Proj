@@ -5,8 +5,12 @@
 // make search functions non-case sensitive
 
 /* genre insertion */
-/*  */
-/* header files */
+/* convert movie to BST */ // DONE
+/* link genre to movie */
+/* link keywords to movie */
+/* link actors to co-actors */
+
+/* HEADER FILES */
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -15,12 +19,14 @@
 
 using namespace std;
 
-/* FORWARD DECLARATION OF ALL CLASSES */
-
 // classes relevant to actors
-
+/* GLOBAL FUNCTIONS PROTOTYPES */
 string convertToLower(string line);
 int countCharInAString(string line, char c);
+string convertEnumToString(int eNumber);
+int convertStringToEnum(string genre);
+
+/* FORWARD DECLARATION OF ALL CLASSES */
 
 class Actor;         // Actor data type
 class ActorNode;     // node of ActorTree
@@ -36,15 +42,15 @@ class MoviesDirected; // a list to store pointer of all movies which are directe
 // classes relevant to movies
 class Movie;          // Movie data type
 class MovieNode;      // node of MovieList, its data part is the Movie class
-class MovieList;      // doubly linked list of MovieNode
+class MovieList;      // BST of MovieNode
 class ActorsInMovie;  // a node of a list that stores pointer of all actors who have acted in a movie
 class YearWiseList;   // a list to store movies in ascending order of year released
 class YearWiseNode;   // node of the above class
 class RatingWiseList; // a list to store movies in ascending order of rating
 class RatingWiseNode; // node of the above class
 
-//classes relevant to genre
-class Genre;
+// classes relevant to genre
+class GenreNode;
 
 /* CLASS DEFINITIONS */
 
@@ -84,7 +90,9 @@ public:
 
     ptrToGenreList = &arrayOfGenre;
      */
-    string genre; // will be converted to dynamic array of string
+    // string genre; // will be converted to pointer dynamic array of string
+    GenreNode *startOfListOfGenres = NULL;
+    int nOfGenres = 0; // number of genres that a movie has
 
     unsigned short int year;
     float imdb_score;
@@ -112,8 +120,11 @@ public:
     unsigned int movie_fb_likes;
     bool color;
 
+    void insertGenreInMovie(int);
     void insertActorInMovie(Actor *ptrToActor);
+    bool checkGenreInMovie(string genre);
     void printActorsOfMovie();
+    void printGenresOfMovie();
 };
 
 class Actor
@@ -169,7 +180,7 @@ public:
     bool SearchActor(string name);
     /* If the actor is found in the tree
     the function will return true
-    else the function will return false*/
+    else the function will return false */
 };
 
 class MoviesDirected
@@ -220,37 +231,48 @@ public:
     bool SearchDirector(string name);
     /* If the director is found in the tree
     the function will return true
-    else the function will return false*/
+    else the function will return false */
 };
-
 
 class MovieNode
 {
 public:
     Movie data;
-    MovieNode *next;
-    MovieNode *prev;
+    MovieNode *right;
+    MovieNode *left;
 };
 
 class MovieList
 {
 public:
-    MovieNode *start = NULL;
-    MovieNode *last = NULL;
+    MovieNode *root = NULL;
+    MovieNode *ploc = NULL;
+    MovieNode *loc = NULL;
     // user-defined functions
 
-    /* function that checks if MovieList is empty */
+    /* Function that checks if MovieList is empty */
     bool isEmpty();
 
-    /*function that reads 1 line of CSV,
+    /* Function that reads 1 line of CSV,
     creates object of MovieNode,
     stores all entries in data part of MovieNode,
-    calls insertNode function to insert tempMovie in DLL*/
+    calls InsertMovie function to insert tempMovie in DLL */
     void Parser();
 
-    /* function that acts like insertAtEnd function of DLL
-    it inserts the tempMovie at end of the list */
-    void insertNode(MovieNode *tempMovie);
+    /* If Tree is empty or the movie node is not found
+    it will insert a newNode of MovieNode type and return the node's address
+    however if the MovieNode was already found in search function,
+    then it will only return the node's address */
+    void InsertMovie(MovieNode *tempMovie);
+
+    /* If the movie is found in the tree
+    the function will return true
+    else the function will return false */
+    bool SearchMovie(string name);
+
+    /* Function that prints title/details of all movies
+    in alphabetical order of title */
+    void PrintMovies(MovieNode *ptr);
 };
 
 class YearWiseList
@@ -284,8 +306,10 @@ public:
     bool isEmpty();
     void searchNode(float rating);
     void insertSorted(Movie *newMovie);
-    /* 12. Prints movies from highest to lowest rating. */
+    /* 12. Prints movies from highest to lowest rating .*/
     void printMoviesRatingWise();
+    /* 13. Print movies of a certain genre Rating Wise */
+    void printMoviesOfGenre(string genre);
 };
 class RatingWiseNode
 {
@@ -294,40 +318,41 @@ public:
     RatingWiseNode *next = NULL;
 };
 
-class Genre
+class GenreNode
 {
-    public:
-    enum genre
-    {
-        Action,
-        Adventure,
-        Animation,
-        Biography,
-        Comedy,
-        Crime,
-        Documentary,
-        Drama,
-        Family,
-        Fantasy,
-        FilmNoir,
-        History,
-        Horror,
-        Music,
-        Musical,
-        Mystery,
-        Romance,
-        SciFi,
-        Short,
-        Sport,
-        Superhero,
-        Thriller,
-        War,
-        Western,
-    };
-    string convertEnumToString(int eNumber); 
-    int convertStringToEnum(string genre);
+public:
+    int genreEnum;
+    GenreNode *next = NULL;
 };
 
+/* ENUM */
+enum genre
+{
+    Action,
+    Adventure,
+    Animation,
+    Biography,
+    Comedy,
+    Crime,
+    Documentary,
+    Drama,
+    Family,
+    Fantasy,
+    FilmNoir,
+    History,
+    Horror,
+    Music,
+    Musical,
+    Mystery,
+    Romance,
+    SciFi,
+    Short,
+    Sport,
+    Superhero,
+    Thriller,
+    War,
+    Western,
+};
 
 /* GLOBAL VARIABLE LISTS */
 ActorTree *globalListOfActors = new ActorTree();
@@ -335,11 +360,9 @@ DirectorTree *globalListOfDirectors = new DirectorTree();
 YearWiseList *globalListOfYearWiseMovies = new YearWiseList();
 RatingWiseList *globalListOfRatingWiseMovies = new RatingWiseList();
 
+/* FUNCTION DEFINITIONS OF CLASS FUNCTIONS */
 
-
-/* FUNCTION DEFINITIONS OF CLASS FUNCTIONS*/
-
-bool MovieList::isEmpty() { return start == NULL; }
+bool MovieList::isEmpty() { return root == NULL; }
 void MovieList::Parser()
 {
     int count = 0;
@@ -357,7 +380,39 @@ void MovieList::Parser()
         string tempString, tempString2; // temporary string to convert string to numeric data types
         int tempInt;
         getline(inputString, tempMovie->data.title, ',');
-        getline(inputString, tempMovie->data.genre, ',');
+
+        /* START: Genres are parsed
+        converted to their respective eNums
+        and stored in a dynamic array of int */
+
+        //  tempString is a string containing all genres
+        getline(inputString, tempString, ',');
+
+        /* we count '|' in tempString
+        sizeOfGenre = count+1 */
+        int countOfGenres = countCharInAString(tempString, '|') + 1;
+        string tempGenre;
+
+        // dynamic int array of genres eNums
+
+        // stringstream helps to separate genres using separator '|'
+        stringstream genreString(tempString);
+
+        // separation of genres, and storing them in eNums
+        for (int i = 0; i < countOfGenres; i++)
+        {
+            if (i == countOfGenres - 1)
+                getline(genreString, tempString);
+            else
+                getline(genreString, tempString, '|');
+            tempInt = convertStringToEnum(tempString);
+            tempMovie->data.insertGenreInMovie(tempInt);
+        }
+
+        // number of genres are also stored in Movie
+        tempMovie->data.nOfGenres = countOfGenres;
+        // tempMovie->data.printGenresOfMovie();
+        /* END */
 
         // converting year to int
         getline(inputString, tempString, ',');
@@ -378,7 +433,7 @@ void MovieList::Parser()
         else
         create a new node of DirectorNode type, insert it in DirectorTree
         point director pointer to that data part of that node
-        update name, fb_likes, MoviesDirected for that director*/
+        update name, fb_likes, MoviesDirected for that director */
 
         DirectorNode *tempDirectorNode;
         tempDirectorNode = globalListOfDirectors->InsertDirector(tempString, tempInt); // inserting director in global list of director
@@ -483,35 +538,92 @@ void MovieList::Parser()
         count++;
         // cout << count << ". Title: " << tempMovie->data.title << " Genre: " << tempMovie->data.year << endl;
 
-        insertNode(tempMovie);
+        // inserting MovieNode in MovieTree
+        InsertMovie(tempMovie);
+        // inserting address of Movie in an Year Wise index
         globalListOfYearWiseMovies->insertSorted(&tempMovie->data);
+        // inserting address of Movie in a Rating Wise index
         globalListOfRatingWiseMovies->insertSorted(&tempMovie->data);
-        tempString.clear();
-        tempString2.clear();
     }
 }
 
-void MovieList::insertNode(MovieNode *tempMovie)
+void MovieList::InsertMovie(MovieNode *tempMovie)
 {
+
     /* if DLL is empty */
+    MovieNode *newNode = new MovieNode();
+    newNode = tempMovie;
+    SearchMovie(tempMovie->data.title);
     if (isEmpty())
     {
-        start = tempMovie;
-        last = tempMovie;
+        root = newNode;
     }
-    /* if DLL contains only 1 node */
-    else if (start == last)
-    {
-        last = tempMovie;
-        start->next = last;
-        last->prev = start;
-    }
-    /* if DLL contains more than 1 node */
     else
     {
-        last->next = tempMovie;
-        tempMovie->prev = last;
-        last = tempMovie;
+        if (ploc->data.title > newNode->data.title)
+            ploc->left = newNode;
+        else if (ploc->data.title <= newNode->data.title)
+            ploc->right = newNode;
+    }
+}
+
+bool MovieList::SearchMovie(string name)
+{
+    if (!isEmpty())
+    {
+        loc = root;
+        ploc = NULL;
+        while (loc != NULL)
+        {
+            if (name != loc->data.title) // keep traversing if node not found
+            {
+                ploc = loc;
+                if (name < loc->data.title)
+                    loc = loc->left;
+                else if (name > loc->data.title)
+                    loc = loc->right;
+            }
+            else // return if node found, loc contains address of node
+                return true;
+        }
+    }
+    return false;
+}
+
+void MovieList::PrintMovies(MovieNode *ptr)
+{
+    if (ptr == root)
+        cout << "The movies in our database are: \n\n";
+    if (!isEmpty())
+    {
+        if (ptr != NULL)
+        {
+            PrintMovies(ptr->left);
+            cout << ptr->data.title << endl;
+            PrintMovies(ptr->right);
+        }
+    }
+}
+
+void Movie::insertGenreInMovie(int genreToBeInserted)
+{
+    GenreNode *loc;
+    GenreNode *ploc;
+    GenreNode *newGenre = new GenreNode();
+    newGenre->genreEnum = genreToBeInserted;
+    newGenre->next = NULL;
+    if (startOfListOfGenres == NULL)
+        startOfListOfGenres = newGenre;
+
+    else
+    {
+        loc = startOfListOfGenres;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newGenre;
     }
 }
 
@@ -535,6 +647,35 @@ void Movie::insertActorInMovie(Actor *ptrToActor)
         ploc->next = newActor;
     }
 }
+bool Movie::checkGenreInMovie(string genre)
+{
+    GenreNode *loc = startOfListOfGenres;
+    int genreNum = convertStringToEnum(genre);
+    if (genreNum != -1)
+    {
+        while (loc != NULL)
+        {
+            if (genreNum == loc->genreEnum)
+                return true;
+            loc = loc->next;
+        }
+
+        // for (int i = 0; i < nOfGenres; i++)
+        {
+            // cout << *ptrToGenres[i] << endl;
+            // cout << "searching: " << genreNum << "from num: " << ((*ptrToGenres) + i) << " from Movie: " << title << endl;
+            // if (genreNum == *((*ptrToGenres) + i))
+            // {
+            //     //  *((*ptrToGenres) + i)
+            //     check = true;
+            //     break;
+            // }
+        }
+    }
+    else
+        cout << "Invalid genre type." << endl;
+    return false;
+}
 void Movie::printActorsOfMovie()
 {
     ActorsInMovie *loc = startOfListOfActors;
@@ -545,6 +686,17 @@ void Movie::printActorsOfMovie()
         cout << ++count << ". " << loc->data->name << endl;
         loc = loc->next;
     }
+}
+void Movie::printGenresOfMovie()
+{
+    GenreNode *loc = startOfListOfGenres;
+    cout << "The genres of " << title << " are:" << endl;
+    while (loc != NULL)
+    {
+        cout << convertEnumToString(loc->genreEnum) << " ";
+        loc = loc->next;
+    }
+    cout << endl;
 }
 
 void Actor::insertActedMovies(Movie *ptrToMovie)
@@ -805,7 +957,7 @@ void YearWiseList::searchNode(int year)
 
         while (loc->data->year <= year)
         { /* keep traversing until greater year is found
-          if greater year is not found then ploc = last node*/
+          if greater year is not found then ploc = last node */
             ploc = loc;
             loc = loc->next;
             if (loc == NULL)
@@ -839,7 +991,21 @@ void YearWiseList::printFromYear(int year)
     }
 }
 
-bool RatingWiseList::isEmpty() { return start == NULL; }
+void RatingWiseList::printMoviesOfGenre(string genre)
+{
+    loc = start;
+    while (loc != NULL)
+    {
+        if (loc->data->checkGenreInMovie(genre))
+            cout << "Genre: " << genre << "\tRating: " << loc->data->imdb_score << "\tMovie Title: " << loc->data->title << endl;
+        loc = loc->next;
+    }
+}
+
+bool RatingWiseList::isEmpty()
+{
+    return start == NULL;
+}
 void RatingWiseList::insertSorted(Movie *newMovie)
 {
     RatingWiseNode *newNode = new RatingWiseNode();
@@ -878,7 +1044,7 @@ void RatingWiseList::searchNode(float rating)
 
         while (loc->data->imdb_score >= rating)
         { /* keep traversing until greater year is found
-          if greater year is not found then ploc = last node*/
+          if greater year is not found then ploc = last node */
             ploc = loc;
             loc = loc->next;
             if (loc == NULL)
@@ -901,6 +1067,116 @@ void RatingWiseList::printMoviesRatingWise()
     }
 }
 
+string convertEnumToString(int eNumber)
+{
+    switch (eNumber)
+    {
+    case Action:
+        return "Action";
+    case Adventure:
+        return "Adventure";
+    case Animation:
+        return "Animation";
+    case Biography:
+        return "Biography";
+    case Comedy:
+        return "Comedy";
+    case Crime:
+        return "Crime";
+    case Documentary:
+        return "Documentary";
+    case Drama:
+        return "Drama";
+    case Family:
+        return "Family";
+    case Fantasy:
+        return "Fantasy";
+    case FilmNoir:
+        return "Film-Noir";
+    case History:
+        return "History";
+    case Horror:
+        return "Horror";
+    case Music:
+        return "Music";
+    case Musical:
+        return "Musical";
+    case Mystery:
+        return "Mystery";
+    case Romance:
+        return "Romance";
+    case SciFi:
+        return "Sci-Fi";
+    case Short:
+        return "Short";
+    case Sport:
+        return "Sport";
+    case Superhero:
+        return "Superhero";
+    case Thriller:
+        return "Thriller";
+    case War:
+        return "War";
+    case Western:
+        return "Western";
+    default:
+        return "Invalid Enum";
+    }
+}
+
+int convertStringToEnum(string genre)
+{
+    if (genre == "Action")
+        return 0;
+    else if (genre == "Adventure")
+        return 1;
+    else if (genre == "Animation")
+        return 2;
+    else if (genre == "Biography")
+        return 3;
+    else if (genre == "Comedy")
+        return 4;
+    else if (genre == "Crime")
+        return 5;
+    else if (genre == "Documentary")
+        return 6;
+    else if (genre == "Drama")
+        return 7;
+    else if (genre == "Family")
+        return 8;
+    else if (genre == "Fantasy")
+        return 9;
+    else if (genre == "FilmNoir" || genre == "Film-Noir")
+        return 10;
+    else if (genre == "History")
+        return 11;
+    else if (genre == "Horror")
+        return 12;
+    else if (genre == "Music")
+        return 13;
+    else if (genre == "Musical")
+        return 14;
+    else if (genre == "Mystery")
+        return 15;
+    else if (genre == "Romance")
+        return 16;
+    else if (genre == "SciFi" || genre == "Sci-Fi")
+        return 17;
+    else if (genre == "Short")
+        return 18;
+    else if (genre == "Sport")
+        return 19;
+    else if (genre == "Superhero")
+        return 20;
+    else if (genre == "Thriller")
+        return 21;
+    else if (genre == "War")
+        return 22;
+    else if (genre == "Western")
+        return 23;
+    else
+        return -1;
+}
 
 /* GLOBAL FUNCTIONS */
 string convertToLower(string line)
@@ -927,7 +1203,6 @@ int main()
 {
     MovieList m;
     m.Parser();
-
-    globalListOfActors->SearchActor("Tom Cruise");
-    globalListOfActors->loc->data.printCoActors();
+    // m.PrintMovies(m.root);
+    globalListOfRatingWiseMovies->printMoviesOfGenre("Fantasy");
 }
