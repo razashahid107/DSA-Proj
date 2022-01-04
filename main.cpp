@@ -5,8 +5,6 @@
 // make search functions non-case sensitive
 
 /* genre insertion */
-/* convert movie to BST */ // DONE
-/* link genre to movie */
 /* link keywords to movie */
 /* link actors to co-actors */
 
@@ -51,6 +49,9 @@ class RatingWiseNode; // node of the above class
 
 // classes relevant to genre
 class GenreNode;
+
+// classes relevant to keywords
+class KeyWordNode;
 
 /* CLASS DEFINITIONS */
 
@@ -109,6 +110,7 @@ public:
     unsigned int cast_total_fb_likes;
     unsigned short int facenumber_in_poster;
 
+    KeyWordNode *startOfListOfKeywords;
     string keywords; // will be converted to dynamic array of string
     string imdb_link;
     unsigned short int num_user_reviews;
@@ -120,9 +122,11 @@ public:
     unsigned int movie_fb_likes;
     bool color;
 
-    void insertGenreInMovie(int);
+    void insertGenreInMovie(int genreToBeInserted);
+    void insertKeywordInMovie(string keyWordToBeInserted);
     void insertActorInMovie(Actor *ptrToActor);
     bool checkGenreInMovie(string genre);
+    bool checkKeywordInMovie(string keyword);
     void printActorsOfMovie();
     void printGenresOfMovie();
 };
@@ -136,6 +140,7 @@ public:
     MoviesActedIn *startOfList;
     MoviesActedIn *ploc = NULL;
     MoviesActedIn *loc = NULL;
+    Actor *startOfCoActorsList;
     string tempCoActor1;
     string tempCoActor2;
     void insertActedMovies(Movie *ptrToMovie);
@@ -145,8 +150,15 @@ public:
     void findCoActors(MoviesActedIn *loc);
     /* 2. Print Co Actors of an actor and the movie they acted in */
     void printCoActors();
+    /* 4. */
+    void printCoActorsOfCoActors(string actor);
     /* 5. Check whether 2 actors are coActors */
     void checkAandB(string actor2);
+
+    /* search the actor
+    you have a list of movies he has acted in
+        in each movie you have a list of actor who has acted in it
+            traverse that list and if the name of actor != name in list  */
 };
 
 /* class definitions */
@@ -201,6 +213,8 @@ public:
     void insertDirectedMovies(Movie *ptrToMovie);
     /* 6. Function that prints all the movies directed by a director */
     void printDirectedMovies();
+    /* function to check if a director has directed movie of a certain genre */
+    bool checkGenreForDirector(string genre);
 };
 
 class DirectorNode
@@ -232,6 +246,9 @@ public:
     /* If the director is found in the tree
     the function will return true
     else the function will return false */
+
+    /* 7. Print directors who have directed movies of a certain genre */
+    void printDirectorOfGenres(DirectorNode *ptr, string genre);
 };
 
 class MovieNode
@@ -268,11 +285,41 @@ public:
     /* If the movie is found in the tree
     the function will return true
     else the function will return false */
-    bool SearchMovie(string name);
+    bool SearchMovieName(string name);
 
     /* Function that prints title/details of all movies
     in alphabetical order of title */
     void PrintMovies(MovieNode *ptr);
+
+    /* 8. Search a movie by name or keywords, (movie title not necessarily complete) */
+    void SearchMovie(MovieNode *ptr, string searchedWord)
+    {
+        if (searchedWord.size() < 3)
+        {
+            cout << "You must enter at least 3 words for the search to proceed. " << endl;
+            return;
+        }
+        else
+        {
+            if (ptr == root)
+                cout << "Movies relevant to the word " << searchedWord << " are:\n\n";
+            if (ptr != NULL)
+            {
+                SearchMovie(ptr->left, searchedWord);
+                string tempTitle = convertToLower(ptr->data.title);
+                if (tempTitle.find(convertToLower(searchedWord)) != string::npos || ptr->data.checkKeywordInMovie(searchedWord))
+                    cout << "Title: " << ptr->data.title << endl;
+                SearchMovie(ptr->right, searchedWord);
+                /* traverse through movies
+                check if searchedWord exist in movie title,
+                if yes, then print movie name
+                else proceed
+                also check if searchedWord == keyword of movie
+                if yes then print movie name
+                else proceed  */
+            }
+        }
+    }
 };
 
 class YearWiseList
@@ -323,6 +370,13 @@ class GenreNode
 public:
     int genreEnum;
     GenreNode *next = NULL;
+};
+
+class KeyWordNode
+{
+public:
+    string keyword;
+    KeyWordNode *next;
 };
 
 /* ENUM */
@@ -393,8 +447,6 @@ void MovieList::Parser()
         int countOfGenres = countCharInAString(tempString, '|') + 1;
         string tempGenre;
 
-        // dynamic int array of genres eNums
-
         // stringstream helps to separate genres using separator '|'
         stringstream genreString(tempString);
 
@@ -405,13 +457,13 @@ void MovieList::Parser()
                 getline(genreString, tempString);
             else
                 getline(genreString, tempString, '|');
+            // converting genre into its enum
             tempInt = convertStringToEnum(tempString);
+            // storing each eNum in a linked list of int
             tempMovie->data.insertGenreInMovie(tempInt);
         }
-
         // number of genres are also stored in Movie
         tempMovie->data.nOfGenres = countOfGenres;
-        // tempMovie->data.printGenresOfMovie();
         /* END */
 
         // converting year to int
@@ -459,19 +511,17 @@ void MovieList::Parser()
         {
             getline(inputString, tempString, ',');
 
-            // converting actor 1 fb likes to int
+            // converting actor fb likes to int
             getline(inputString, tempString2, ',');
-            tempInt = atoi(tempString.c_str());
+            tempInt = atoi(tempString2.c_str());
             /* create a new ActorsInMovie list that contains list of actors of this movie
             parse name of actor1, and search it in global list of actors
-
             if found, insert pointer of his node to ActorsInMovie
             update moviesActedIn for that actor
 
             if not found, insert a new node of Actor type in global list of actors
             insert pointer of his node to ActorsInMovie
-            update actor name, fb likes, moviesActedIn for that actor
-            */
+            update actor name, fb likes, moviesActedIn for that actor */
 
             tempActorNode = globalListOfActors->InsertActor(tempString, tempInt); // inserting actor in global list of actor
 
@@ -480,18 +530,6 @@ void MovieList::Parser()
             tempActorNode->data.insertActedMovies(&tempMovie->data);
         }
         /* END:  parsing of actor into ActorNode ends here */
-
-        getline(inputString, tempString, ',');
-
-        // converting actor 2 fb likes to int
-        getline(inputString, tempString, ',');
-        tempInt = atoi(tempString.c_str());
-
-        getline(inputString, tempString, ',');
-
-        // converting actor 3 fb likes to int
-        getline(inputString, tempString, ',');
-        tempInt = atoi(tempString.c_str());
 
         // converting gross to long int
         getline(inputString, tempString, ',');
@@ -509,7 +547,21 @@ void MovieList::Parser()
         getline(inputString, tempString, ',');
         tempMovie->data.facenumber_in_poster = atoi(tempString.c_str());
 
-        getline(inputString, tempMovie->data.keywords, ',');
+        /* START */
+        getline(inputString, tempString, ',');
+        int countOfKeywords = countCharInAString(tempString, '|') + 1;
+        stringstream KeywordString(tempString);
+
+        for (int i = 0; i < countOfKeywords; i++)
+        {
+            if (i == countOfKeywords - 1)
+                getline(KeywordString, tempString);
+            else
+                getline(KeywordString, tempString, '|');
+            tempMovie->data.insertKeywordInMovie(tempString);
+        }
+        /* END */
+
         getline(inputString, tempMovie->data.imdb_link, ',');
 
         // converting num_user_reviews to int
@@ -553,7 +605,7 @@ void MovieList::InsertMovie(MovieNode *tempMovie)
     /* if DLL is empty */
     MovieNode *newNode = new MovieNode();
     newNode = tempMovie;
-    SearchMovie(tempMovie->data.title);
+    SearchMovieName(tempMovie->data.title);
     if (isEmpty())
     {
         root = newNode;
@@ -567,7 +619,7 @@ void MovieList::InsertMovie(MovieNode *tempMovie)
     }
 }
 
-bool MovieList::SearchMovie(string name)
+bool MovieList::SearchMovieName(string name)
 {
     if (!isEmpty())
     {
@@ -626,6 +678,26 @@ void Movie::insertGenreInMovie(int genreToBeInserted)
         ploc->next = newGenre;
     }
 }
+void Movie::insertKeywordInMovie(string keyWordToBeInserted)
+{
+    KeyWordNode *loc;
+    KeyWordNode *ploc;
+    KeyWordNode *newGenre = new KeyWordNode();
+    newGenre->keyword = keyWordToBeInserted;
+    newGenre->next = NULL;
+    if (startOfListOfKeywords == NULL)
+        startOfListOfKeywords = newGenre;
+    else
+    {
+        loc = startOfListOfKeywords;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newGenre;
+    }
+}
 
 void Movie::insertActorInMovie(Actor *ptrToActor)
 {
@@ -659,21 +731,20 @@ bool Movie::checkGenreInMovie(string genre)
                 return true;
             loc = loc->next;
         }
-
-        // for (int i = 0; i < nOfGenres; i++)
-        {
-            // cout << *ptrToGenres[i] << endl;
-            // cout << "searching: " << genreNum << "from num: " << ((*ptrToGenres) + i) << " from Movie: " << title << endl;
-            // if (genreNum == *((*ptrToGenres) + i))
-            // {
-            //     //  *((*ptrToGenres) + i)
-            //     check = true;
-            //     break;
-            // }
-        }
     }
     else
         cout << "Invalid genre type." << endl;
+    return false;
+}
+bool Movie::checkKeywordInMovie(string keyword)
+{
+    KeyWordNode *loc = startOfListOfKeywords;
+    while (loc != NULL)
+    {
+        if (keyword == loc->keyword)
+            return true;
+        loc = loc->next;
+    }
     return false;
 }
 void Movie::printActorsOfMovie()
@@ -722,8 +793,9 @@ void Actor::printActedMovies()
 {
     int count = 0;
 
-    cout << "Actor name: " << name << endl;
-    cout << "Movies shooted: " << countOfMovies << endl
+    cout << "Actor Name: " << name << endl
+         << "Facebook Likes: " << fb_likes << endl
+         << "Movies shooted: " << countOfMovies << endl
          << endl;
     cout << name << " has acted in following movies." << endl;
 
@@ -735,19 +807,19 @@ void Actor::printActedMovies()
     }
 }
 void Actor::findCoActors(MoviesActedIn *loc)
-{
+{ // each movie contains list of 3 actors
     if (loc->data->startOfListOfActors->data->name == name)
-    {
+    { // if first actor in list == actor then the other 2 are co-actors
         tempCoActor1 = loc->data->startOfListOfActors->next->data->name;
         tempCoActor2 = loc->data->startOfListOfActors->next->next->data->name;
     }
     else if (loc->data->startOfListOfActors->next->data->name == name)
-    {
+    { // if second actor in list == actor then the other 2 are co-actors
         tempCoActor1 = loc->data->startOfListOfActors->data->name;
         tempCoActor2 = loc->data->startOfListOfActors->next->next->data->name;
     }
     else
-    {
+    { // if third actor in list == actor then the other 2 are co-actors
         tempCoActor1 = loc->data->startOfListOfActors->data->name;
         tempCoActor2 = loc->data->startOfListOfActors->next->data->name;
     }
@@ -765,6 +837,26 @@ void Actor::printCoActors()
         cout << "Movie name: " << loc->data->title << " (" << loc->data->year << ")" << endl
              << "Co-Actors: " << tempCoActor1 << " & " << tempCoActor2 << endl
              << endl;
+
+        loc = loc->next;
+    }
+}
+void Actor::printCoActorsOfCoActors(string actor)
+{
+    cout << name << " has acted in following movies with following actors." << endl
+         << endl;
+    loc = startOfList;
+
+    while (loc != NULL)
+    {
+        findCoActors(loc);
+
+        printCoActorsOfCoActors(tempCoActor1);
+
+        cout << "Movie name: " << loc->data->title << " (" << loc->data->year << ")" << endl
+             << "Co-Actors: " << tempCoActor1 << " & " << tempCoActor2 << endl
+             << endl;
+        printCoActorsOfCoActors(tempCoActor2);
 
         loc = loc->next;
     }
@@ -816,6 +908,18 @@ void Director::printDirectedMovies()
         cout << ++count << ". " << loc->data->title << endl;
         loc = loc->next;
     }
+}
+bool Director::checkGenreForDirector(string genre)
+{
+    MoviesDirected *tempPtr = startOfList;
+    while (tempPtr != NULL)
+    { /* traverse the linked list of movies directed by the director,
+     and if any movie node contains the genre, then return true */
+        if (tempPtr->data->checkGenreInMovie(genre))
+            return true;
+        tempPtr = tempPtr->next;
+    }
+    return false;
 }
 
 ActorNode *ActorTree::InsertActor(string name, unsigned short int fb_likes)
@@ -916,6 +1020,20 @@ bool DirectorTree::SearchDirector(string name)
         }
     }
     return false;
+}
+void DirectorTree::printDirectorOfGenres(DirectorNode *ptr, string genre)
+{
+    if (!isEmpty())
+    {
+        if (ptr != NULL)
+        {
+            printDirectorOfGenres(ptr->left, genre);
+            // check if the
+            if (ptr->data.checkGenreForDirector(genre))
+                cout << ptr->data.name << " " << endl;
+            printDirectorOfGenres(ptr->right, genre);
+        }
+    }
 }
 
 bool YearWiseList::isEmpty() { return start == NULL; }
@@ -1062,7 +1180,7 @@ void RatingWiseList::printMoviesRatingWise()
         if (loc->data->imdb_score == 0)
             cout << "Rating: NOT IN RECORD Title: " << loc->data->title << endl;
         else
-            cout << "Title: " << loc->data->title << " Rating: " << loc->data->imdb_score << endl;
+            cout << "Title: " << loc->data->title << " RATING: " << loc->data->imdb_score << endl;
         loc = loc->next;
     }
 }
@@ -1203,6 +1321,29 @@ int main()
 {
     MovieList m;
     m.Parser();
-    // m.PrintMovies(m.root);
-    globalListOfRatingWiseMovies->printMoviesOfGenre("Fantasy");
+
+    string actor = "Jason Statham";
+    // /*  1. */ globalListOfActors->SearchActor(actor);
+    // globalListOfActors->loc->data.printActedMovies();
+
+    // /*  5. */ globalListOfActors->SearchActor(actor);
+    // globalListOfActors->loc->data.checkAandB("Emma Stone");
+
+    // /* 6. */ globalListOfDirectors->SearchDirector("Simon West");
+    // globalListOfDirectors->loc->data.printDirectedMovies();
+
+    // /* 7. */ globalListOfDirectors->printDirectorOfGenres(globalListOfDirectors->root, "Family");
+
+    m.SearchMovie(m.root, "fight");
+
+    // /* Print only names of all movies (Alphabetical) */m.PrintMovies(m.root);
+    /* print genre of a movie */ // tempMovie->data.printGenresOfMovie();
+
+    // /* 9. */  globalListOfYearWiseMovies->printFromYear(2013);
+
+    // /* 10. a) */ globalListOfYearWiseMovies->printMoviesYearWise();
+
+    // /* 12. */ globalListOfRatingWiseMovies->printMoviesRatingWise();
+
+    // /* 13. */   globalListOfRatingWiseMovies->printMoviesOfGenre("Action");
 }
