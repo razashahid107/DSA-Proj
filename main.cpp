@@ -1,11 +1,9 @@
 /* things to do at end */
+// remove repititve ratingwise node
 // function that prints movies votes wise
 // function that prints movies duration wise
-// implement recursion where possible
+// 10 part b
 // make search functions non-case sensitive
-
-/* genre insertion */
-/* link actors to co-actors */
 
 /* HEADER FILES */
 #include <iostream>
@@ -40,8 +38,8 @@ class MoviesDirected; // a list to store pointer of all movies which are directe
 
 // classes relevant to movies
 class Movie;          // Movie data type
-class MovieNode;      // node of MovieList, its data part is the Movie class
-class MovieList;      // BST of MovieNode
+class MovieNode;      // node of MovieTree, its data part is the Movie class
+class MovieTree;      // BST of MovieNode
 class ActorsInMovie;  // a node of a list that stores pointer of all actors who have acted in a movie
 class YearWiseList;   // a list to store movies in ascending order of year released
 class YearWiseNode;   // node of the above class
@@ -56,6 +54,79 @@ class KeyWordNode;
 
 /* CLASS DEFINITIONS */
 
+class Actor
+{
+public:
+    string name;
+    unsigned short int fb_likes;
+    unsigned int countOfMovies = 0;
+    MoviesActedIn *startOfList;
+    MoviesActedIn *ploc = NULL;
+    MoviesActedIn *loc = NULL;
+    CoActorNode *startOfCoActorsList = NULL;
+    string tempCoActor1;
+    string tempCoActor2;
+    /* Function that inserts movies in actor's movie list in alphabetical order */
+    void insertActedMovies(Movie *ptrToMovie);
+    /* 1. Function that prints details of an actor */
+    void printActedMovies();
+    /* Function that finds the co-Actors of an actor in a specific movie */
+    void findCoActors(MoviesActedIn *loc);
+    /* 2. Print Co Actors of an actor and the movie they acted in */
+    void printCoActors();
+
+    /* 5. Check whether 2 actors are coActors */
+    void checkAandB(string actor2);
+    /* insert Actors in list of Co Actors list */
+    void insertCoActor(Actor *coActor, Movie *movie);
+    void printUniqueCoActors();
+    void printCoActorNameOnly();
+    void printCoActorsOfCoActors();
+
+};
+class ActorNode
+{
+public:
+    Actor data;
+    ActorNode *right = NULL;
+    ActorNode *left = NULL;
+};
+class ActorTree
+{
+public:
+    ActorNode *root = NULL;
+    ActorNode *ploc = NULL;
+    ActorNode *loc = NULL;
+    /* user-defined functions */
+
+    /* function to check if tree is empty */
+    bool isEmpty() { return root == NULL; }
+
+    // an insert function to insert new actor nodes
+    ActorNode *InsertActor(string name, unsigned short int fb_likes);
+    /* If Tree is empty or the director node is not found
+    it will insert a newNode of DirectorNode type and return the node's address
+    however if the directorNode was already found in search function,
+    then it will only return the node's address */
+
+    bool SearchActor(string name);
+    /* If the actor is found in the tree
+    the function will return true
+    else the function will return false */
+
+    /*  */
+    void insertCoActorsOf3Actor(Actor *arrOfActors[3], Movie *movie)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            // insert 2 coactors and movie
+            arrOfActors[i]->insertCoActor(arrOfActors[(i + 1) % 3], movie);
+            arrOfActors[i]->insertCoActor(arrOfActors[(i + 2) % 3], movie);
+            // arrOfActors[i]->data.insertCoActor(arrOfActors[(i + 1) % 3]->data, movie);
+            // arrOfActors[i]->data.insertCoActor(arrOfActors[(i + 2) % 3]->data, movie);
+        }
+    }
+};
 class MoviesActedIn
 {
 public:
@@ -70,37 +141,63 @@ public:
     MoviesActedIn *startOfListOfCommonMovies = NULL;
 };
 
-class ActorsInMovie
+class Director
 {
 public:
-    Actor *data;
-    ActorsInMovie *next;
+    string name;
+    unsigned short int fb_likes;
+    MoviesDirected *startOfList = NULL;
+    MoviesDirected *ploc = NULL;
+    MoviesDirected *loc = NULL;
+    void insertDirectedMovies(Movie *ptrToMovie);
+    /* 6. Function that prints all the movies directed by a director */
+    void printDirectedMovies();
+    /* function to check if a director has directed movie of a certain genre */
+    bool checkGenreForDirector(string genre);
 };
+class DirectorNode
+{
+public:
+    Director data;
+    DirectorNode *right = NULL;
+    DirectorNode *left = NULL;
+};
+class DirectorTree
+{
+public:
+    DirectorNode *root = NULL;
+    DirectorNode *ploc = NULL;
+    DirectorNode *loc = NULL;
+    /* user-defined functions */
+
+    /* function to check if tree is empty */
+    bool isEmpty() { return root == NULL; }
+
+    DirectorNode *InsertDirector(string name, unsigned short int fb_likes);
+    /* If Tree is empty or the director node is not found
+    it will insert a newNode of DirectorNode type and return the node's address
+    however if the directorNode was already found in search function,
+    then it will only return the node's address */
+
+    bool SearchDirector(string name);
+    /* If the director is found in the tree
+    the function will return true
+    else the function will return false */
+
+    /* 7. Print directors who have directed movies of a certain genre */
+    void printDirectorOfGenres(DirectorNode *ptr, string genre);
+};
+class MoviesDirected
+{
+public:
+    Movie *data;
+    MoviesDirected *next;
+};
+
 class Movie
 {
 public:
     string title;
-
-    /*  tempString contains all genres
-    we count '|' in tempString
-    sizeOfGenre = count+1
-    string tempGenre
-    dynamic string array of genres created (size is sizeofgenre)
-
-    stringstream genreString(tempString);
-
-    loop this logic sizeOfGenre times:
-        getline(genreString, tempGenre, '|')
-        if(i == sizeOfGenre)
-            getline(genreString, arrayOfGenre[i], ',')
-
-        arrayOfGenre[i] = convertStringToEnum(tempGenre)
-
-    end of loop
-
-    ptrToGenreList = &arrayOfGenre;
-     */
-    // string genre; // will be converted to pointer dynamic array of string
     GenreNode *startOfListOfGenres = NULL;
     int nOfGenres = 0; // number of genres that a movie has
 
@@ -138,235 +235,6 @@ public:
     void printActorsOfMovie();
     void printGenresOfMovie();
 };
-
-class Actor
-{
-public:
-    string name;
-    unsigned short int fb_likes;
-    unsigned int countOfMovies = 0;
-    MoviesActedIn *startOfList;
-    MoviesActedIn *ploc = NULL;
-    MoviesActedIn *loc = NULL;
-    CoActorNode *startOfCoActorsList = NULL;
-    string tempCoActor1;
-    string tempCoActor2;
-    /* Function that inserts movies in actor's movie list in alphabetical order */
-    void insertActedMovies(Movie *ptrToMovie);
-    /* 1. Function that prints details of an actor */
-    void printActedMovies();
-    /* Function that finds the co-Actors of an actor in a specific movie */
-    void findCoActors(MoviesActedIn *loc);
-    /* 2. Print Co Actors of an actor and the movie they acted in */
-    void printCoActors();
-
-    /* 5. Check whether 2 actors are coActors */
-    void checkAandB(string actor2);
-    /* insert Actors in list of Co Actors list */
-    void insertCoActor(Actor *coActor, Movie *movie)
-    {
-        // if list is empty startofco = actor, start of movie list = movie
-        // else
-        // check if coactor already exists in the list
-        // if exists then only insert movie
-        // if not then insert co actor and movie
-        MoviesActedIn *newMovieNode = new MoviesActedIn;
-        newMovieNode->data = movie;
-        if (startOfCoActorsList == NULL)
-        {
-            CoActorNode *newCoActorNode = new CoActorNode;
-            newCoActorNode->data = coActor;
-            startOfCoActorsList = newCoActorNode;
-            // insert movie
-            newCoActorNode->startOfListOfCommonMovies = newMovieNode;
-        }
-        else
-        {
-            CoActorNode *loc = startOfCoActorsList;
-            CoActorNode *ploc = NULL;
-            bool coActorExists = false;
-            // traverse thru list
-            while (loc != NULL)
-            {
-                if (loc->data == coActor) // coactor already exist
-                {
-                    coActorExists = true;
-                    break;
-                }
-                ploc = loc;
-                loc = loc->next;
-            }
-            if (coActorExists)
-            {
-                // insert movie
-                {
-                    // always insert at front as order doesnot matter
-                    newMovieNode->next = loc->startOfListOfCommonMovies;
-                    loc->startOfListOfCommonMovies = newMovieNode;
-                }
-            }
-            else
-            { // co actor does not exist, ploc points to last co actor
-              // insert movie and coactor
-                CoActorNode *newCoActorNode = new CoActorNode;
-                newCoActorNode->data = coActor;
-                ploc->next = newCoActorNode;
-                // insert movie
-                {
-                    // always insert at front as order doesnot matter
-                    newMovieNode->next = newCoActorNode->startOfListOfCommonMovies;
-                    newCoActorNode->startOfListOfCommonMovies = newMovieNode;
-                }
-            }
-        }
-    }
-    void printUniqueCoActors()
-    {
-        CoActorNode *loc = startOfCoActorsList;
-        cout << "Co-Actors of " << name << " are:" << endl;
-        while (loc != NULL)
-        {
-            cout << loc->data->name << endl
-                 << "The common movies are: " << endl;
-            MoviesActedIn *movieLoc = loc->startOfListOfCommonMovies;
-            while (movieLoc != NULL)
-            {
-                cout << movieLoc->data->title << endl;
-                movieLoc = movieLoc->next;
-            }
-
-            cout << endl;
-            loc = loc->next;
-        }
-        cout << endl;
-    }
-    void printCoActorNameOnly()
-    {
-        CoActorNode *loc = startOfCoActorsList;
-        while (loc != NULL)
-        {
-            cout << loc->data->name << endl;
-            loc = loc->next;
-        }
-        cout << endl;
-    }
-    /* 4. */
-    void printCoActorsOfCoActors()
-    {
-        CoActorNode *loc = startOfCoActorsList;
-        while (loc != NULL)
-        {
-            cout << "Co Co Actors of " << name << " via " << loc->data->name << ":" << endl;
-            loc->data->printCoActorNameOnly();
-
-            loc = loc->next;
-        }
-    }
-};
-
-/* class definitions */
-
-class ActorNode
-{
-public:
-    Actor data;
-    ActorNode *right = NULL;
-    ActorNode *left = NULL;
-};
-
-class ActorTree
-{
-public:
-    ActorNode *root = NULL;
-    ActorNode *ploc = NULL;
-    ActorNode *loc = NULL;
-    /* user-defined functions */
-
-    /* function to check if tree is empty */
-    bool isEmpty() { return root == NULL; }
-
-    // an insert function to insert new actor nodes
-    ActorNode *InsertActor(string name, unsigned short int fb_likes);
-    /* If Tree is empty or the director node is not found
-    it will insert a newNode of DirectorNode type and return the node's address
-    however if the directorNode was already found in search function,
-    then it will only return the node's address */
-
-    bool SearchActor(string name);
-    /* If the actor is found in the tree
-    the function will return true
-    else the function will return false */
-
-    /*  */
-    void insertCoActorsOf3Actor(Actor *arrOfActors[3], Movie *movie)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            // insert 2 coactors and movie
-            arrOfActors[i]->insertCoActor(arrOfActors[(i + 1) % 3], movie);
-            arrOfActors[i]->insertCoActor(arrOfActors[(i + 2) % 3], movie);
-            // arrOfActors[i]->data.insertCoActor(arrOfActors[(i + 1) % 3]->data, movie);
-            // arrOfActors[i]->data.insertCoActor(arrOfActors[(i + 2) % 3]->data, movie);
-        }
-    }
-};
-
-class MoviesDirected
-{
-public:
-    Movie *data;
-    MoviesDirected *next;
-};
-
-class Director
-{
-public:
-    string name;
-    unsigned short int fb_likes;
-    MoviesDirected *startOfList = NULL;
-    MoviesDirected *ploc = NULL;
-    MoviesDirected *loc = NULL;
-    void insertDirectedMovies(Movie *ptrToMovie);
-    /* 6. Function that prints all the movies directed by a director */
-    void printDirectedMovies();
-    /* function to check if a director has directed movie of a certain genre */
-    bool checkGenreForDirector(string genre);
-};
-
-class DirectorNode
-{
-public:
-    Director data;
-    DirectorNode *right = NULL;
-    DirectorNode *left = NULL;
-};
-
-class DirectorTree
-{
-public:
-    DirectorNode *root = NULL;
-    DirectorNode *ploc = NULL;
-    DirectorNode *loc = NULL;
-    /* user-defined functions */
-
-    /* function to check if tree is empty */
-    bool isEmpty() { return root == NULL; }
-
-    DirectorNode *InsertDirector(string name, unsigned short int fb_likes);
-    /* If Tree is empty or the director node is not found
-    it will insert a newNode of DirectorNode type and return the node's address
-    however if the directorNode was already found in search function,
-    then it will only return the node's address */
-
-    bool SearchDirector(string name);
-    /* If the director is found in the tree
-    the function will return true
-    else the function will return false */
-
-    /* 7. Print directors who have directed movies of a certain genre */
-    void printDirectorOfGenres(DirectorNode *ptr, string genre);
-};
-
 class MovieNode
 {
 public:
@@ -374,8 +242,7 @@ public:
     MovieNode *right;
     MovieNode *left;
 };
-
-class MovieList
+class MovieTree
 {
 public:
     MovieNode *root = NULL;
@@ -383,7 +250,7 @@ public:
     MovieNode *loc = NULL;
     // user-defined functions
 
-    /* Function that checks if MovieList is empty */
+    /* Function that checks if MovieTree is empty */
     bool isEmpty();
 
     /* Function that reads 1 line of CSV,
@@ -413,7 +280,12 @@ public:
     /* Print all details of a movie */
     void PrintMovieDetails(string movieTitle);
 };
-
+class ActorsInMovie
+{
+public:
+    Actor *data;
+    ActorsInMovie *next;
+};
 class YearWiseList
 {
 public:
@@ -428,14 +300,12 @@ public:
     /* 9. Prints all movie titles released in the given year */
     void printFromYear(int year);
 };
-
 class YearWiseNode
 {
 public:
     Movie *data;
     YearWiseNode *next = NULL;
 };
-
 class RatingWiseList
 {
 public:
@@ -508,8 +378,120 @@ RatingWiseList *globalListOfRatingWiseMovies = new RatingWiseList();
 
 /* FUNCTION DEFINITIONS OF CLASS FUNCTIONS */
 
-bool MovieList::isEmpty() { return root == NULL; }
-void MovieList::Parser()
+void Movie::insertGenreInMovie(int genreToBeInserted)
+{
+    GenreNode *loc;
+    GenreNode *ploc;
+    GenreNode *newGenre = new GenreNode();
+    newGenre->genreEnum = genreToBeInserted;
+    newGenre->next = NULL;
+    if (startOfListOfGenres == NULL)
+        startOfListOfGenres = newGenre;
+
+    else
+    {
+        loc = startOfListOfGenres;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newGenre;
+    }
+}
+void Movie::insertKeywordInMovie(string keyWordToBeInserted)
+{
+    KeyWordNode *loc;
+    KeyWordNode *ploc;
+    KeyWordNode *newGenre = new KeyWordNode();
+    newGenre->keyword = keyWordToBeInserted;
+    newGenre->next = NULL;
+    if (startOfListOfKeywords == NULL)
+        startOfListOfKeywords = newGenre;
+    else
+    {
+        loc = startOfListOfKeywords;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newGenre;
+    }
+}
+void Movie::insertActorInMovie(Actor *ptrToActor)
+{
+    ActorsInMovie *loc;
+    ActorsInMovie *ploc;
+    ActorsInMovie *newActor = new ActorsInMovie();
+    newActor->data = ptrToActor;
+    newActor->next = NULL;
+    if (startOfListOfActors == NULL)
+        startOfListOfActors = newActor;
+    else
+    {
+        loc = startOfListOfActors;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newActor;
+    }
+}
+bool Movie::checkGenreInMovie(string genre)
+{
+    GenreNode *loc = startOfListOfGenres;
+    int genreNum = convertStringToEnum(genre);
+    if (genreNum != -1)
+    {
+        while (loc != NULL)
+        {
+            if (genreNum == loc->genreEnum)
+                return true;
+            loc = loc->next;
+        }
+    }
+    else
+        cout << "Invalid genre type." << endl;
+    return false;
+}
+bool Movie::checkKeywordInMovie(string keyword)
+{
+    KeyWordNode *loc = startOfListOfKeywords;
+    while (loc != NULL)
+    {
+        if (keyword == loc->keyword)
+            return true;
+        loc = loc->next;
+    }
+    return false;
+}
+void Movie::printActorsOfMovie()
+{
+    ActorsInMovie *loc = startOfListOfActors;
+    int count = 0;
+    cout << "MAIN ACTORS: " << endl;
+    while (loc != NULL)
+    {
+        cout << ++count << ". " << loc->data->name << endl;
+        loc = loc->next;
+    }
+}
+void Movie::printGenresOfMovie()
+{
+    GenreNode *loc = startOfListOfGenres;
+    cout << "GENRES: ";
+    while (loc != NULL)
+    {
+        cout << convertEnumToString(loc->genreEnum) << " ";
+        loc = loc->next;
+    }
+    cout << endl;
+}
+
+bool MovieTree::isEmpty() { return root == NULL; }
+void MovieTree::Parser()
 {
     int count = 0;
     ifstream inputFile;
@@ -703,8 +685,7 @@ void MovieList::Parser()
         globalListOfRatingWiseMovies->insertSorted(&tempMovie->data);
     }
 }
-
-void MovieList::InsertMovie(MovieNode *tempMovie)
+void MovieTree::InsertMovie(MovieNode *tempMovie)
 {
 
     /* if DLL is empty */
@@ -723,8 +704,7 @@ void MovieList::InsertMovie(MovieNode *tempMovie)
             ploc->right = newNode;
     }
 }
-
-bool MovieList::SearchMovieName(string name)
+bool MovieTree::SearchMovieName(string name)
 {
     if (!isEmpty())
     {
@@ -746,8 +726,7 @@ bool MovieList::SearchMovieName(string name)
     }
     return false;
 }
-
-void MovieList::PrintMovies(MovieNode *ptr)
+void MovieTree::PrintMovies(MovieNode *ptr)
 {
     if (ptr == root)
         cout << "The movies in our database are: \n\n";
@@ -761,7 +740,7 @@ void MovieList::PrintMovies(MovieNode *ptr)
         }
     }
 }
-void MovieList::SearchMovie(MovieNode *ptr, string searchedWord)
+void MovieTree::SearchMovie(MovieNode *ptr, string searchedWord)
 {
     if (searchedWord.size() < 3)
     {
@@ -789,7 +768,7 @@ void MovieList::SearchMovie(MovieNode *ptr, string searchedWord)
         }
     }
 }
-void MovieList::PrintMovieDetails(string movieTitle)
+void MovieTree::PrintMovieDetails(string movieTitle)
 {
     if (SearchMovieName(movieTitle))
     {
@@ -813,118 +792,6 @@ void MovieList::PrintMovieDetails(string movieTitle)
              << "COLORS: " << (loc->data.color ? "Colored" : "Black and White") << endl
              << endl;
     }
-}
-void Movie::insertGenreInMovie(int genreToBeInserted)
-{
-    GenreNode *loc;
-    GenreNode *ploc;
-    GenreNode *newGenre = new GenreNode();
-    newGenre->genreEnum = genreToBeInserted;
-    newGenre->next = NULL;
-    if (startOfListOfGenres == NULL)
-        startOfListOfGenres = newGenre;
-
-    else
-    {
-        loc = startOfListOfGenres;
-        while (loc != NULL)
-        {
-            ploc = loc;
-            loc = loc->next;
-        }
-        ploc->next = newGenre;
-    }
-}
-void Movie::insertKeywordInMovie(string keyWordToBeInserted)
-{
-    KeyWordNode *loc;
-    KeyWordNode *ploc;
-    KeyWordNode *newGenre = new KeyWordNode();
-    newGenre->keyword = keyWordToBeInserted;
-    newGenre->next = NULL;
-    if (startOfListOfKeywords == NULL)
-        startOfListOfKeywords = newGenre;
-    else
-    {
-        loc = startOfListOfKeywords;
-        while (loc != NULL)
-        {
-            ploc = loc;
-            loc = loc->next;
-        }
-        ploc->next = newGenre;
-    }
-}
-
-void Movie::insertActorInMovie(Actor *ptrToActor)
-{
-    ActorsInMovie *loc;
-    ActorsInMovie *ploc;
-    ActorsInMovie *newActor = new ActorsInMovie();
-    newActor->data = ptrToActor;
-    newActor->next = NULL;
-    if (startOfListOfActors == NULL)
-        startOfListOfActors = newActor;
-    else
-    {
-        loc = startOfListOfActors;
-        while (loc != NULL)
-        {
-            ploc = loc;
-            loc = loc->next;
-        }
-        ploc->next = newActor;
-    }
-}
-bool Movie::checkGenreInMovie(string genre)
-{
-    GenreNode *loc = startOfListOfGenres;
-    int genreNum = convertStringToEnum(genre);
-    if (genreNum != -1)
-    {
-        while (loc != NULL)
-        {
-            if (genreNum == loc->genreEnum)
-                return true;
-            loc = loc->next;
-        }
-    }
-    else
-        cout << "Invalid genre type." << endl;
-    return false;
-}
-bool Movie::checkKeywordInMovie(string keyword)
-{
-    KeyWordNode *loc = startOfListOfKeywords;
-    while (loc != NULL)
-    {
-        if (keyword == loc->keyword)
-            return true;
-        loc = loc->next;
-    }
-    return false;
-}
-void Movie::printActorsOfMovie()
-{
-    ActorsInMovie *loc = startOfListOfActors;
-    int count = 0;
-    cout << "MAIN ACTORS: " << endl;
-    while (loc != NULL)
-    {
-        cout << ++count << ". " << loc->data->name << endl;
-        loc = loc->next;
-    }
-}
-void Movie::printGenresOfMovie()
-{
-    GenreNode *loc = startOfListOfGenres;
-    cout << "GENRES: ";
-    while (loc != NULL)
-    {
-        cout << convertEnumToString(loc->genreEnum) << " ";
-        loc = loc->next;
-    }
-    cout << endl;
 }
 
 void Actor::insertActedMovies(Movie *ptrToMovie)
@@ -1015,8 +882,88 @@ void Actor::printCoActors()
         loc = loc->next;
     }
 }
+void Actor::insertCoActor(Actor *coActor, Movie *movie)
+{
+    // if list is empty startofco = actor, start of movie list = movie
+    // else
+    // check if coactor already exists in the list
+    // if exists then only insert movie
+    // if not then insert co actor and movie
+    MoviesActedIn *newMovieNode = new MoviesActedIn;
+    newMovieNode->data = movie;
+    if (startOfCoActorsList == NULL)
+    {
+        CoActorNode *newCoActorNode = new CoActorNode;
+        newCoActorNode->data = coActor;
+        startOfCoActorsList = newCoActorNode;
+        // insert movie
+        newCoActorNode->startOfListOfCommonMovies = newMovieNode;
+    }
+    else
+    {
+        CoActorNode *loc = startOfCoActorsList;
+        CoActorNode *ploc = NULL;
+        bool coActorExists = false;
+        // traverse thru list
+        while (loc != NULL)
+        {
+            if (loc->data == coActor) // coactor already exist
+            {
+                coActorExists = true;
+                break;
+            }
+            ploc = loc;
+            loc = loc->next;
+        }
+        if (coActorExists)
+        {
+            // insert movie
+            {
+                // always insert at front as order doesnot matter
+                newMovieNode->next = loc->startOfListOfCommonMovies;
+                loc->startOfListOfCommonMovies = newMovieNode;
+            }
+        }
+        else
+        { // co actor does not exist, ploc points to last co actor
+          // insert movie and coactor
+            CoActorNode *newCoActorNode = new CoActorNode;
+            newCoActorNode->data = coActor;
+            ploc->next = newCoActorNode;
+            // insert movie
+            {
+                // always insert at front as order doesnot matter
+                newMovieNode->next = newCoActorNode->startOfListOfCommonMovies;
+                newCoActorNode->startOfListOfCommonMovies = newMovieNode;
+            }
+        }
+    }
+}
+void Actor::printUniqueCoActors()
+{
+    CoActorNode *loc = startOfCoActorsList;
+    cout << "Co-Actors of " << name << " are:" << endl;
+    while (loc != NULL)
+    {
+        cout << loc->data->name << endl
+             << "The common movies are: " << endl;
+        MoviesActedIn *movieLoc = loc->startOfListOfCommonMovies;
+        while (movieLoc != NULL)
+        {
+            cout << movieLoc->data->title << endl;
+            movieLoc = movieLoc->next;
+        }
+
+        cout << endl;
+        loc = loc->next;
+    }
+    cout << endl;
+}
 void Actor::checkAandB(string actor2)
 {
+    
+
+
     loc = startOfList;
     bool areCoActors = false;
     while (loc != NULL)
@@ -1032,48 +979,26 @@ void Actor::checkAandB(string actor2)
     if (!areCoActors)
         cout << name << " & " << actor2 << " are not Co-Actors." << endl;
 }
-
-void Director::insertDirectedMovies(Movie *ptrToMovie)
+void Actor::printCoActorNameOnly()
 {
-    MoviesDirected *newMovie = new MoviesDirected();
-    newMovie->data = ptrToMovie;
-    newMovie->next = NULL;
-    if (startOfList == NULL)
-        startOfList = newMovie;
-    else
-    {
-        loc = startOfList;
-        while (loc != NULL)
-        {
-            ploc = loc;
-            loc = loc->next;
-        }
-        ploc->next = newMovie;
-    }
-}
-void Director::printDirectedMovies()
-{
-
-    int count = 0;
-    cout << name << " has directed the following movies." << endl;
-    loc = startOfList;
+    CoActorNode *loc = startOfCoActorsList;
     while (loc != NULL)
     {
-        cout << ++count << ". " << loc->data->title << endl;
+        cout << loc->data->name << endl;
         loc = loc->next;
     }
+    cout << endl;
 }
-bool Director::checkGenreForDirector(string genre)
+void Actor::printCoActorsOfCoActors()
 {
-    MoviesDirected *tempPtr = startOfList;
-    while (tempPtr != NULL)
-    { /* traverse the linked list of movies directed by the director,
-     and if any movie node contains the genre, then return true */
-        if (tempPtr->data->checkGenreInMovie(genre))
-            return true;
-        tempPtr = tempPtr->next;
+    CoActorNode *loc = startOfCoActorsList;
+    while (loc != NULL)
+    {
+        cout << "Co Co Actors of " << name << " via " << loc->data->name << ":" << endl;
+        loc->data->printCoActorNameOnly();
+
+        loc = loc->next;
     }
-    return false;
 }
 
 ActorNode *ActorTree::InsertActor(string name, unsigned short int fb_likes)
@@ -1122,6 +1047,49 @@ bool ActorTree::SearchActor(string name)
             else // return if node found, loc contains address of node
                 return true;
         }
+    }
+    return false;
+}
+
+void Director::insertDirectedMovies(Movie *ptrToMovie)
+{
+    MoviesDirected *newMovie = new MoviesDirected();
+    newMovie->data = ptrToMovie;
+    newMovie->next = NULL;
+    if (startOfList == NULL)
+        startOfList = newMovie;
+    else
+    {
+        loc = startOfList;
+        while (loc != NULL)
+        {
+            ploc = loc;
+            loc = loc->next;
+        }
+        ploc->next = newMovie;
+    }
+}
+void Director::printDirectedMovies()
+{
+
+    int count = 0;
+    cout << name << " has directed the following movies." << endl;
+    loc = startOfList;
+    while (loc != NULL)
+    {
+        cout << ++count << ". " << loc->data->title << endl;
+        loc = loc->next;
+    }
+}
+bool Director::checkGenreForDirector(string genre)
+{
+    MoviesDirected *tempPtr = startOfList;
+    while (tempPtr != NULL)
+    { /* traverse the linked list of movies directed by the director,
+     and if any movie node contains the genre, then return true */
+        if (tempPtr->data->checkGenreInMovie(genre))
+            return true;
+        tempPtr = tempPtr->next;
     }
     return false;
 }
@@ -1273,7 +1241,6 @@ void RatingWiseList::printMoviesOfGenre(string genre)
         loc = loc->next;
     }
 }
-
 bool RatingWiseList::isEmpty()
 {
     return start == NULL;
@@ -1325,7 +1292,6 @@ void RatingWiseList::searchNode(float rating)
         // now ploc is the predecessor of movie node
     }
 }
-
 void RatingWiseList::printMoviesRatingWise()
 {
     loc = start;
@@ -1338,6 +1304,8 @@ void RatingWiseList::printMoviesRatingWise()
         loc = loc->next;
     }
 }
+
+/* GLOBAL FUNCTIONS */
 
 string convertEnumToString(int eNumber)
 {
@@ -1395,7 +1363,6 @@ string convertEnumToString(int eNumber)
         return "Invalid Enum";
     }
 }
-
 int convertStringToEnum(string genre)
 {
     if (genre == "Action")
@@ -1449,8 +1416,6 @@ int convertStringToEnum(string genre)
     else
         return -1;
 }
-
-/* GLOBAL FUNCTIONS */
 string convertToLower(string line)
 {
     string temp = line;
@@ -1471,10 +1436,11 @@ int countCharInAString(string line, char c)
     }
     return count;
 }
+
 int main()
 {
     srand(time(0));
-    MovieList m;
+    MovieTree m;
     m.Parser();
     time_t start = clock();
     cout << "Time Taken: " << (clock() - start) / (double)CLOCKS_PER_SEC * 1000 << " milliseconds" << endl;
@@ -1484,14 +1450,14 @@ int main()
     // /*  1. */ globalListOfActors->SearchActor(actor);
     // globalListOfActors->loc->data.printActedMovies();
 
-    /* 2. */ globalListOfActors->SearchActor(actor);
-    globalListOfActors->loc->data.printCoActors();
+    // /* 2. */ globalListOfActors->SearchActor(actor);
+    // globalListOfActors->loc->data.printCoActors();
 
-    /* 3. */ globalListOfActors->SearchActor(actor);
-    globalListOfActors->loc->data.printUniqueCoActors();
+    // /* 3. */ globalListOfActors->SearchActor(actor);
+    // globalListOfActors->loc->data.printUniqueCoActors();
 
-    /*  4. */ globalListOfActors->SearchActor(actor);
-    globalListOfActors->loc->data.printCoActorsOfCoActors();
+    // /*  4. */ globalListOfActors->SearchActor(actor);
+    // globalListOfActors->loc->data.printCoActorsOfCoActors();
 
     // /*  5. */ globalListOfActors->SearchActor(actor);
     // globalListOfActors->loc->data.checkAandB("Emma Stone");
