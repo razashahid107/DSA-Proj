@@ -1,7 +1,4 @@
 /* things to do at end */
-// remove repititve ratingwise node
-// function that prints movies votes wise
-// function that prints movies duration wise
 // 10 part b
 // make search functions non-case sensitive
 
@@ -28,7 +25,7 @@ class Actor;         // Actor data type
 class ActorNode;     // node of ActorTree
 class ActorTree;     // BST of ActorNode
 class MoviesActedIn; // a list to store pointer of all movies in which a particular actor has acted in
-class CoActorNode;
+class CoActorNode;   // a node of list of an actor's co actors, this list also contains a list of common movies
 
 // classes relevant to directors
 class Director;       // Director data type
@@ -41,10 +38,9 @@ class Movie;          // Movie data type
 class MovieNode;      // node of MovieTree, its data part is the Movie class
 class MovieTree;      // BST of MovieNode
 class ActorsInMovie;  // a node of a list that stores pointer of all actors who have acted in a movie
+class IndexedNode;    // node of the above class
 class YearWiseList;   // a list to store movies in ascending order of year released
-class YearWiseNode;   // node of the above class
 class RatingWiseList; // a list to store movies in ascending order of rating
-class RatingWiseNode; // node of the above class
 
 // classes relevant to genre
 class GenreNode;
@@ -64,25 +60,20 @@ public:
     MoviesActedIn *ploc = NULL;
     MoviesActedIn *loc = NULL;
     CoActorNode *startOfCoActorsList = NULL;
-    string tempCoActor1;
-    string tempCoActor2;
     /* Function that inserts movies in actor's movie list in alphabetical order */
     void insertActedMovies(Movie *ptrToMovie);
     /* 1. Function that prints details of an actor */
     void printActedMovies();
-    /* Function that finds the co-Actors of an actor in a specific movie */
-    void findCoActors(MoviesActedIn *loc);
-    /* 2. Print Co Actors of an actor and the movie they acted in */
-    void printCoActors();
-
     /* 5. Check whether 2 actors are coActors */
-    void checkAandB(string actor2);
+    void checkCoActors(string actor2);
     /* insert Actors in list of Co Actors list */
     void insertCoActor(Actor *coActor, Movie *movie);
+    /* 3. Prints unique co actors of an actor and all the movies they have acted in */
     void printUniqueCoActors();
-    void printCoActorNameOnly();
+    /* Prints only the names of all co actors of an actor */
+    void printCoActorNameOnly(string dontPrint);
+    /* 4. Prints co actors of co actors of an actor */
     void printCoActorsOfCoActors();
-
 };
 class ActorNode
 {
@@ -102,30 +93,19 @@ public:
     /* function to check if tree is empty */
     bool isEmpty() { return root == NULL; }
 
-    // an insert function to insert new actor nodes
-    ActorNode *InsertActor(string name, unsigned short int fb_likes);
     /* If Tree is empty or the director node is not found
     it will insert a newNode of DirectorNode type and return the node's address
     however if the directorNode was already found in search function,
     then it will only return the node's address */
+    ActorNode *InsertActor(string name, unsigned short int fb_likes);
 
-    bool SearchActor(string name);
     /* If the actor is found in the tree
     the function will return true
     else the function will return false */
+    bool SearchActor(string name);
 
-    /*  */
-    void insertCoActorsOf3Actor(Actor *arrOfActors[3], Movie *movie)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            // insert 2 coactors and movie
-            arrOfActors[i]->insertCoActor(arrOfActors[(i + 1) % 3], movie);
-            arrOfActors[i]->insertCoActor(arrOfActors[(i + 2) % 3], movie);
-            // arrOfActors[i]->data.insertCoActor(arrOfActors[(i + 1) % 3]->data, movie);
-            // arrOfActors[i]->data.insertCoActor(arrOfActors[(i + 2) % 3]->data, movie);
-        }
-    }
+    /* function that traverses through actor tree and prints name of actor whose name matches searchedName */
+    void DeepSearchActor(ActorNode *ptr, string searchedName);
 };
 class MoviesActedIn
 {
@@ -199,23 +179,16 @@ class Movie
 public:
     string title;
     GenreNode *startOfListOfGenres = NULL;
-    int nOfGenres = 0; // number of genres that a movie has
-
     unsigned short int year;
     float imdb_score;
-
     Director *ptrToDir;
-
     unsigned short int num_critic_for_views;
     unsigned short int duration;
-
     ActorsInMovie *startOfListOfActors;
-
     long gross;
     unsigned int num_voted_users;
     unsigned int cast_total_fb_likes;
     unsigned short int facenumber_in_poster;
-
     KeyWordNode *startOfListOfKeywords;
     string imdb_link;
     unsigned short int num_user_reviews;
@@ -226,10 +199,13 @@ public:
     float aspect_ratio;
     unsigned int movie_fb_likes;
     bool color;
-
+    /* a function that inserts a genre in a movie */
     void insertGenreInMovie(int genreToBeInserted);
+    /* a function that inserts a keyword in a movie */
     void insertKeywordInMovie(string keyWordToBeInserted);
+    /* a function that inserts an actor in a movie */
     void insertActorInMovie(Actor *ptrToActor);
+
     bool checkGenreInMovie(string genre);
     bool checkKeywordInMovie(string keyword);
     void printActorsOfMovie();
@@ -275,7 +251,7 @@ public:
     void PrintMovies(MovieNode *ptr);
 
     /* 8. Search a movie by name or keywords, (movie title not necessarily complete) */
-    void SearchMovie(MovieNode *ptr, string searchedWord);
+    void DeepSearchMovie(MovieNode *ptr, string searchedWord);
 
     /* Print all details of a movie */
     void PrintMovieDetails(string movieTitle);
@@ -289,42 +265,39 @@ public:
 class YearWiseList
 {
 public:
-    YearWiseNode *start = NULL;
-    YearWiseNode *ploc = NULL;
-    YearWiseNode *loc = NULL;
+    IndexedNode *start = NULL;
+    IndexedNode *ploc = NULL;
+    IndexedNode *loc = NULL;
     bool isEmpty();
     void searchNode(int year);
+    /* inserts ptr to movie in the list in order of its release year */
     void insertSorted(Movie *newMovie);
     /* 10. a) Prints movie titles increasing year-wise */
     void printMoviesYearWise();
     /* 9. Prints all movie titles released in the given year */
     void printFromYear(int year);
 };
-class YearWiseNode
+class IndexedNode
 {
 public:
     Movie *data;
-    YearWiseNode *next = NULL;
+    IndexedNode *next = NULL;
 };
 class RatingWiseList
 {
 public:
-    RatingWiseNode *start = NULL;
-    RatingWiseNode *ploc = NULL;
-    RatingWiseNode *loc = NULL;
+    IndexedNode *start = NULL;
+    IndexedNode *ploc = NULL;
+    IndexedNode *loc = NULL;
     bool isEmpty();
+
     void searchNode(float rating);
+    /* inserts ptr to movie in the list in order of its rating */
     void insertSorted(Movie *newMovie);
     /* 12. Prints movies from highest to lowest rating .*/
     void printMoviesRatingWise();
     /* 13. Print movies of a certain genre Rating Wise */
     void printMoviesOfGenre(string genre);
-};
-class RatingWiseNode
-{
-public:
-    Movie *data;
-    RatingWiseNode *next = NULL;
 };
 
 class GenreNode
@@ -387,7 +360,6 @@ void Movie::insertGenreInMovie(int genreToBeInserted)
     newGenre->next = NULL;
     if (startOfListOfGenres == NULL)
         startOfListOfGenres = newGenre;
-
     else
     {
         loc = startOfListOfGenres;
@@ -461,7 +433,7 @@ bool Movie::checkKeywordInMovie(string keyword)
     KeyWordNode *loc = startOfListOfKeywords;
     while (loc != NULL)
     {
-        if (keyword == loc->keyword)
+        if (loc->keyword.find(keyword) != string::npos)
             return true;
         loc = loc->next;
     }
@@ -537,7 +509,6 @@ void MovieTree::Parser()
             tempMovie->data.insertGenreInMovie(tempInt);
         }
         // number of genres are also stored in Movie
-        tempMovie->data.nOfGenres = countOfGenres;
         /* END */
 
         // converting year to int
@@ -562,11 +533,12 @@ void MovieTree::Parser()
         update name, fb_likes, MoviesDirected for that director */
 
         DirectorNode *tempDirectorNode;
-        tempDirectorNode = globalListOfDirectors->InsertDirector(tempString, tempInt); // inserting director in global list of director
-
-        tempMovie->data.ptrToDir = &tempDirectorNode->data; // setting ptrToDir equal to its director
-
-        tempMovie->data.ptrToDir->insertDirectedMovies(&tempMovie->data); // adding movie nodes in director's directed movies
+        /* inserting director in global list of directors without duplication */
+        tempDirectorNode = globalListOfDirectors->InsertDirector(tempString, tempInt);
+        // setting ptrToDir equal to its director
+        tempMovie->data.ptrToDir = &tempDirectorNode->data;
+        // adding movie nodes in director's directed movies
+        tempMovie->data.ptrToDir->insertDirectedMovies(&tempMovie->data);
 
         // cout << "The director of " << tempMovie->data.ptrToDir->startOfList->data->title << " is " << tempMovie->data.ptrToDir->name << endl;
         /* END: parsing of director ends here */
@@ -590,6 +562,7 @@ void MovieTree::Parser()
             // converting actor fb likes to int
             getline(inputString, tempString2, ',');
             tempInt = atoi(tempString2.c_str());
+
             /* create a new ActorsInMovie list that contains list of actors of this movie
             parse name of actor1, and search it in global list of actors
             if found, insert pointer of his node to ActorsInMovie
@@ -607,9 +580,10 @@ void MovieTree::Parser()
 
             /* inserting movie in actor's acted movies */
             tempActorNode->data.insertActedMovies(&tempMovie->data);
+            // array of pointer to all 3 actors
             tempActor[i] = &tempActorNode->data;
         }
-
+        // inserting co actors of all 3 actors here
         for (int i = 0; i < 3; i++)
         {
             tempActor[i]->insertCoActor(tempActor[(i + 1) % 3], &tempMovie->data);
@@ -634,7 +608,7 @@ void MovieTree::Parser()
         getline(inputString, tempString, ',');
         tempMovie->data.facenumber_in_poster = atoi(tempString.c_str());
 
-        /* START */
+        /* START: start of parsing of keywords */
         getline(inputString, tempString, ',');
         int countOfKeywords = countCharInAString(tempString, '|') + 1;
         stringstream KeywordString(tempString);
@@ -647,7 +621,7 @@ void MovieTree::Parser()
                 getline(KeywordString, tempString, '|');
             tempMovie->data.insertKeywordInMovie(tempString);
         }
-        /* END */
+        /* END: end of parsing of keywords */
 
         getline(inputString, tempMovie->data.imdb_link, ',');
 
@@ -675,7 +649,6 @@ void MovieTree::Parser()
         tempMovie->data.color = (tempString == "Color") ? true : false;
 
         count++;
-        // cout << count << ". Title: " << tempMovie->data.title << " Genre: " << tempMovie->data.year << endl;
 
         // inserting MovieNode in MovieTree
         InsertMovie(tempMovie);
@@ -712,7 +685,9 @@ bool MovieTree::SearchMovieName(string name)
         ploc = NULL;
         while (loc != NULL)
         {
-            if (name != loc->data.title) // keep traversing if node not found
+            // cout << convertToLower(name) << endl;
+            // cout << convertToLower(loc->data.title) << endl;
+            if (convertToLower(name) != convertToLower(loc->data.title)) // keep traversing if node not found
             {
                 ploc = loc;
                 if (name < loc->data.title)
@@ -740,11 +715,11 @@ void MovieTree::PrintMovies(MovieNode *ptr)
         }
     }
 }
-void MovieTree::SearchMovie(MovieNode *ptr, string searchedWord)
+void MovieTree::DeepSearchMovie(MovieNode *ptr, string searchedWord)
 {
     if (searchedWord.size() < 3)
     {
-        cout << "You must enter at least 3 words for the search to proceed. " << endl;
+        cout << "You must enter at least 3 letters for the search to proceed. " << endl;
         return;
     }
     else
@@ -760,11 +735,11 @@ void MovieTree::SearchMovie(MovieNode *ptr, string searchedWord)
             cout << "Movies relevant to the word " << searchedWord << " are:\n\n";
         if (ptr != NULL)
         {
-            SearchMovie(ptr->left, searchedWord);
+            DeepSearchMovie(ptr->left, searchedWord);
             string tempTitle = convertToLower(ptr->data.title);
             if (tempTitle.find(convertToLower(searchedWord)) != string::npos || ptr->data.checkKeywordInMovie(searchedWord))
                 cout << "Title: " << ptr->data.title << endl;
-            SearchMovie(ptr->right, searchedWord);
+            DeepSearchMovie(ptr->right, searchedWord);
         }
     }
 }
@@ -772,6 +747,8 @@ void MovieTree::PrintMovieDetails(string movieTitle)
 {
     if (SearchMovieName(movieTitle))
     {
+        cout << "Movie search successful! The movie details are:" << endl
+             << endl;
         cout << "MOVIE TITLE: " << loc->data.title << endl;
         loc->data.printGenresOfMovie();
         cout << "RELEASED IN: " << loc->data.year << endl
@@ -792,6 +769,8 @@ void MovieTree::PrintMovieDetails(string movieTitle)
              << "COLORS: " << (loc->data.color ? "Colored" : "Black and White") << endl
              << endl;
     }
+    else
+        cout << "No such movie exists. Make sure you have entered the complete title, or try deep search to see related movies." << endl;
 }
 
 void Actor::insertActedMovies(Movie *ptrToMovie)
@@ -847,48 +826,13 @@ void Actor::printActedMovies()
         loc = loc->next;
     }
 }
-void Actor::findCoActors(MoviesActedIn *loc)
-{ // each movie contains list of 3 actors
-    if (loc->data->startOfListOfActors->data->name == name)
-    { // if first actor in list == actor then the other 2 are co-actors
-        tempCoActor1 = loc->data->startOfListOfActors->next->data->name;
-        tempCoActor2 = loc->data->startOfListOfActors->next->next->data->name;
-    }
-    else if (loc->data->startOfListOfActors->next->data->name == name)
-    { // if second actor in list == actor then the other 2 are co-actors
-        tempCoActor1 = loc->data->startOfListOfActors->data->name;
-        tempCoActor2 = loc->data->startOfListOfActors->next->next->data->name;
-    }
-    else
-    { // if third actor in list == actor then the other 2 are co-actors
-        tempCoActor1 = loc->data->startOfListOfActors->data->name;
-        tempCoActor2 = loc->data->startOfListOfActors->next->data->name;
-    }
-}
-void Actor::printCoActors()
-{
-    cout << name << " has acted in following movies with following actors." << endl
-         << endl;
-    loc = startOfList;
-
-    while (loc != NULL)
-    {
-        findCoActors(loc);
-
-        cout << "Movie name: " << loc->data->title << " (" << loc->data->year << ")" << endl
-             << "Co-Actors: " << tempCoActor1 << " & " << tempCoActor2 << endl
-             << endl;
-
-        loc = loc->next;
-    }
-}
 void Actor::insertCoActor(Actor *coActor, Movie *movie)
 {
     // if list is empty startofco = actor, start of movie list = movie
     // else
     // check if coactor already exists in the list
-    // if exists then only insert movie
-    // if not then insert co actor and movie
+    // if co actor exists then only insert movie
+    // if co actor does not exist then insert co actor and movie
     MoviesActedIn *newMovieNode = new MoviesActedIn;
     newMovieNode->data = movie;
     if (startOfCoActorsList == NULL)
@@ -919,7 +863,7 @@ void Actor::insertCoActor(Actor *coActor, Movie *movie)
         {
             // insert movie
             {
-                // always insert at front as order doesnot matter
+                // always insert at front (to reduce time complexity) as order doesnot matter
                 newMovieNode->next = loc->startOfListOfCommonMovies;
                 loc->startOfListOfCommonMovies = newMovieNode;
             }
@@ -931,16 +875,14 @@ void Actor::insertCoActor(Actor *coActor, Movie *movie)
             newCoActorNode->data = coActor;
             ploc->next = newCoActorNode;
             // insert movie
-            {
-                // always insert at front as order doesnot matter
-                newMovieNode->next = newCoActorNode->startOfListOfCommonMovies;
-                newCoActorNode->startOfListOfCommonMovies = newMovieNode;
-            }
+            // always insert at front (to reduce time complexity) as order doesnot matter
+            newMovieNode->next = newCoActorNode->startOfListOfCommonMovies;
+            newCoActorNode->startOfListOfCommonMovies = newMovieNode;
         }
     }
 }
 void Actor::printUniqueCoActors()
-{
+{ // simply prints the list of co actors of an actor and the list of movies they have acted together
     CoActorNode *loc = startOfCoActorsList;
     cout << "Co-Actors of " << name << " are:" << endl;
     while (loc != NULL)
@@ -953,38 +895,42 @@ void Actor::printUniqueCoActors()
             cout << movieLoc->data->title << endl;
             movieLoc = movieLoc->next;
         }
-
         cout << endl;
         loc = loc->next;
     }
     cout << endl;
 }
-void Actor::checkAandB(string actor2)
+void Actor::checkCoActors(string actor2)
 {
-    
-
-
-    loc = startOfList;
-    bool areCoActors = false;
-    while (loc != NULL)
+    bool isCoActor = false;
+    CoActorNode *loc;
+    for (loc = startOfCoActorsList; loc != NULL; loc = loc->next)
     {
-        findCoActors(loc);
-        if (actor2 == tempCoActor1 || actor2 == tempCoActor2)
+        if (loc->data->name == actor2)
         {
-            areCoActors = true;
-            cout << name << " & " << actor2 << " have acted together in " << loc->data->title << "." << endl;
+            isCoActor = true;
+            break;
         }
-        loc = loc->next;
     }
-    if (!areCoActors)
-        cout << name << " & " << actor2 << " are not Co-Actors." << endl;
+    if (isCoActor)
+    {
+        cout << name << " and " << loc->data->name << " are Co Actors, they have acted together in:" << endl;
+        for (MoviesActedIn *movieLoc = loc->startOfListOfCommonMovies; movieLoc != NULL; movieLoc = movieLoc->next)
+        {
+            cout << movieLoc->data->title << " (" << movieLoc->data->year << ")" << endl;
+        }
+    }
+    else
+        cout << name << " and " << actor2 << " are not Co Actors" << endl;
 }
-void Actor::printCoActorNameOnly()
+void Actor::printCoActorNameOnly(string dontPrint)
 {
     CoActorNode *loc = startOfCoActorsList;
     while (loc != NULL)
     {
-        cout << loc->data->name << endl;
+        // dont print original actor's name
+        if (loc->data->name != dontPrint)
+            cout << loc->data->name << endl;
         loc = loc->next;
     }
     cout << endl;
@@ -995,8 +941,8 @@ void Actor::printCoActorsOfCoActors()
     while (loc != NULL)
     {
         cout << "Co Co Actors of " << name << " via " << loc->data->name << ":" << endl;
-        loc->data->printCoActorNameOnly();
-
+        // print all co actors of co actors except the original actor
+        loc->data->printCoActorNameOnly(name);
         loc = loc->next;
     }
 }
@@ -1049,6 +995,26 @@ bool ActorTree::SearchActor(string name)
         }
     }
     return false;
+}
+void ActorTree::DeepSearchActor(ActorNode *ptr, string searchedName)
+{
+    if (searchedName.size() < 2)
+    {
+        cout << "You must enter at least 2 letters for the search to proceed" << endl;
+    }
+    else
+    {
+        if (ptr == root)
+            cout << "The following actors have been found.\n\n";
+        if (ptr != NULL)
+        {
+            DeepSearchActor(ptr->left, searchedName);
+            string tempName = convertToLower(ptr->data.name);
+            if (tempName.find(convertToLower(searchedName)) != string::npos)
+                cout << ptr->data.name << endl;
+            DeepSearchActor(ptr->right, searchedName);
+        }
+    }
 }
 
 void Director::insertDirectedMovies(Movie *ptrToMovie)
@@ -1161,7 +1127,7 @@ void DirectorTree::printDirectorOfGenres(DirectorNode *ptr, string genre)
 bool YearWiseList::isEmpty() { return start == NULL; }
 void YearWiseList::insertSorted(Movie *newMovie)
 {
-    YearWiseNode *newNode = new YearWiseNode();
+    IndexedNode *newNode = new IndexedNode();
     newNode->data = newMovie;
     searchNode(newMovie->year);
     if (isEmpty())
@@ -1247,7 +1213,7 @@ bool RatingWiseList::isEmpty()
 }
 void RatingWiseList::insertSorted(Movie *newMovie)
 {
-    RatingWiseNode *newNode = new RatingWiseNode();
+    IndexedNode *newNode = new IndexedNode();
     newNode->data = newMovie;
     searchNode(newMovie->imdb_score);
     if (isEmpty())
@@ -1445,22 +1411,19 @@ int main()
     time_t start = clock();
     cout << "Time Taken: " << (clock() - start) / (double)CLOCKS_PER_SEC * 1000 << " milliseconds" << endl;
 
-    string actor = "Andrew Garfield";
+    string actor = "Tom Cruise";
 
-    // /*  1. */ globalListOfActors->SearchActor(actor);
+    // /* 1. */ globalListOfActors->SearchActor(actor);
     // globalListOfActors->loc->data.printActedMovies();
-
-    // /* 2. */ globalListOfActors->SearchActor(actor);
-    // globalListOfActors->loc->data.printCoActors();
 
     // /* 3. */ globalListOfActors->SearchActor(actor);
     // globalListOfActors->loc->data.printUniqueCoActors();
 
-    // /*  4. */ globalListOfActors->SearchActor(actor);
+    // /* 4. */ globalListOfActors->SearchActor(actor);
     // globalListOfActors->loc->data.printCoActorsOfCoActors();
 
-    // /*  5. */ globalListOfActors->SearchActor(actor);
-    // globalListOfActors->loc->data.checkAandB("Emma Stone");
+    // /* 5. */ globalListOfActors->SearchActor(actor);
+    // globalListOfActors->loc->data.checkCoActors("Emma Stone");
 
     // /* 6. */ globalListOfDirectors->SearchDirector("Simon West");
     // globalListOfDirectors->loc->data.printDirectedMovies();
@@ -1468,13 +1431,13 @@ int main()
     // /* 7. */ globalListOfDirectors->printDirectorOfGenres(globalListOfDirectors->root, "Family");
 
     /* 8. Deep Search */
-    // m.SearchMovie(m.root, "fight");
+    // m.DeepSearchMovie(m.root, "sex");
     /* 8. Direct Search */
-    // if (m.SearchMovieName("2 Fast 2 Furious"))
-    //     m.PrintMovieDetails(m.loc->data.title);
+    m.PrintMovieDetails("flashdance");
 
     // /* Print only names of all movies (Alphabetical) */m.PrintMovies(m.root);
     /* print genre of a movie */ // tempMovie->data.printGenresOfMovie();
+    // /* deep search an actor */globalListOfActors->DeepSearchActor(globalListOfActors->root, "lund");
 
     // /* 9. */  globalListOfYearWiseMovies->printFromYear(2013);
 
