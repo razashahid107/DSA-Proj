@@ -1445,10 +1445,11 @@ void PrintInstructions()
          << "12. Search oldest Movies." << endl
          << "13. Search all Movies of a specific Genre." << endl
          << "14. Search Top-Rated Movies." << endl
+         << "15. Print names of all movies (Alphabetical)" << endl
          << endl
          << "Enter 0 to exit." << endl
          << endl
-         << "Your input: ";
+         << "Your input => ";
 }
 
 int main()
@@ -1456,157 +1457,178 @@ int main()
     srand(time(0));
     time_t start = clock();
     MovieTree m;
-    int command;
+    int command, number;
     string name1, name2;
     m.Parser();
 
     // cout << "Time Taken: " << (clock() - start) / (double)CLOCKS_PER_SEC * 1000 << " milliseconds" << endl;
 
-    PrintInstructions();
-    cin >> command;
-    system("cls");
-    switch (command)
-    {
-    case 1:
-    {
-        cout << "Enter the name of actor you want to search: ";
-        getchar();
-        getline(cin, name1);
-        /* 1. */ globalListOfActors->SearchActor(name1);
-        globalListOfActors->loc->data.printActedMovies();
-        cout << "Enter any key to proceed...   ";
-        system("pause");
-        break;
-    }
-    case 2:
-    {
-        cout << "Enter the name of actor you want to DEEP search: ";
-        getchar();
-        getline(cin, name1);
-        globalListOfActors->DeepSearchActor(globalListOfActors->root, name1);
-        cout << "Enter any key to proceed...   ";
-        system("pause");
-        break;
-    }
-    case 3:
-    {
-        cout << "Enter the name of Actor whose Co Actors you want to search: ";
-        getchar();
-        getline(cin, name1);
-        /* 3. */ globalListOfActors->SearchActor(name1);
-        globalListOfActors->loc->data.printUniqueCoActors();
-        cout << "Enter any key to proceed...   ";
-        system("pause");
-        break;
-    }
-    case 4:
-    {
-        cout << "Enter the name of Actor whose Co-Co Actors you want to search: ";
-        getchar();
-        getline(cin, name1);
-        /* 4. */ globalListOfActors->SearchActor(name1);
-        globalListOfActors->loc->data.printCoActorsOfCoActors();
-        cout << "Enter any key to proceed...   ";
-        system("pause");
-        break;
-    }
-    case 5:
-    {
-        cout << "Enter name of first actor: ";
-        getline(cin, name1);
+    while (command != 0){
+        PrintInstructions();
+        cin >> command;
+        // system("cls");
+        system("clear");
+        switch (command)
+        {
+        case 1:
+        {
+            cout << "Enter the name of actor you want to search: ";
+            getchar();
+            getline(cin, name1);
+            /* 1. */ globalListOfActors->SearchActor(name1);
+            globalListOfActors->loc->data.printActedMovies();
+            cout << "Enter any key to proceed...   ";
+            system("pause");
+            break;
+        }
+        case 2:
+        {
+            cout << "Enter the name of actor you want to DEEP search: ";
+            getchar();
+            getline(cin, name1);
+            globalListOfActors->DeepSearchActor(globalListOfActors->root, name1);
+            cout << "Enter any key to proceed...   ";
+            system("pause");
+            break;
+        }
+        case 3:
+        {
+            cout << "Enter the name of Actor whose Co Actors you want to search: ";
+            getchar();
+            getline(cin, name1);
+            /* 3. */ globalListOfActors->SearchActor(name1);
+            globalListOfActors->loc->data.printUniqueCoActors();
+            cout << "Enter any key to proceed...   ";
+            system("pause");
+            break;
+        }
+        case 4:
+        {
+            cout << "Enter the name of Actor whose Co-Co Actors you want to search: ";
+            getchar();
+            getline(cin, name1);
+            /* 4. */ globalListOfActors->SearchActor(name1);
+            globalListOfActors->loc->data.printCoActorsOfCoActors();
+            cout << "Enter any key to proceed...   ";
+            system("pause");
+            break;
+        }
+        case 5:
+        {
+            cout << "Enter name of first actor: ";
+            getline(cin, name1);
 
-        cout << "Enter name of second actor: ";
-        getline(cin, name2);
-        /* 5. */ globalListOfActors->SearchActor(name1);
-        globalListOfActors->loc->data.checkCoActors(name2);
-        cout << "Enter any key to proceed...   ";
-        system("pause");
-        break;
-    }
-    case 6:
-    {
-        cout << "Enter the name of Director you want to search: ";
+            cout << "Enter name of second actor: ";
+            getline(cin, name2);
+            /* 5. */ globalListOfActors->SearchActor(name1);
+            globalListOfActors->loc->data.checkCoActors(name2);
+            cout << "Enter any key to proceed...   ";
+            system("pause");
+            break;
+        }
+        case 6:
+        {
+            cout << "Enter the name of Director you want to search: ";
+            getchar();
+            getline(cin, name1);
+            /* 6. */ if (globalListOfDirectors->SearchDirector(name1))
+                globalListOfDirectors->loc->data.printDirectedMovies();
+            else
+                cout << "Director does not exist, try searching again.\n";
+            system("pause");
+
+            break;
+        }
+        case 7:
+        {
+            cout << "Enter a Genre: ";
+            getchar();
+            getline(cin, name1);
+            if (convertStringToEnum(name1) == -1)
+                cout << "Invalid genre, try again." << endl;
+            else
+                /* 7. */ globalListOfDirectors->printDirectorOfGenres(globalListOfDirectors->root, name1);
+            system("pause");
+
+            break;
+        }
+        case 8:
+        {
+            cout << "Enter movie name: ";
+            getchar();
+            getline(cin, name1);
+            /* 8. Direct Search */
+            m.PrintMovieDetails(name1);
+            system("pause");
+            break;
+        }
+        case 9:
+        {
+            cout << "Enter a keyword to deep search a movie: ";
+            getchar();
+            getline(cin, name1);
+            /*  Deep Search */
+            m.DeepSearchMovie(m.root, "flashdance");
+            system("pause");
+            break;
+        }
+        case 10:
+        {
+            // 9.
+            cout << "Enter Year to Search for Movies: ";
+            getchar();
+            cin >> number;
+            globalListOfYearWiseMovies->printFromYear(number);
+
+            break;
+        }
+        case 11:
+        {
+            // 10. b)
+            globalListOfYearWiseMovies->printMoviesYearWiseDescending(globalListOfYearWiseMovies->start);
+
+            break;
+        }
+        case 12:
+        {
+            // 10. a)
+            globalListOfYearWiseMovies->printMoviesYearWise();
+            break;
+        }
+        case 13:
+        {
+            // 13.  
+            cout << "Enter Genre to Search for Movies: ";
+            getchar();
+            getline(cin, name1);
+            globalListOfRatingWiseMovies->printMoviesOfGenre(name1);
+            break;
+        }
+        case 14:
+        {
+            // 12.
+            globalListOfRatingWiseMovies->printMoviesRatingWise();
+            break;
+        }
+        case 15:
+        {
+            // Print only names of all movies (Alphabetical)
+            m.PrintMovies(m.root);
+            break;
+        }
+        case 0:
+        {
+            // exit here
+            break;
+        }
+        default:
+            cout << "Enter a valid input" << endl;
+            break;
+        }
+        // system("pause");
+        // system("cls");
         getchar();
-        getline(cin, name1);
-        /* 6. */ if (globalListOfDirectors->SearchDirector(name1))
-            globalListOfDirectors->loc->data.printDirectedMovies();
-        else
-            cout << "Director does not exist, try searching again.\n";
-        system("pause");
-
-        break;
-    }
-    case 7:
-    {
-        cout << "Enter a Genre: ";
         getchar();
-        getline(cin, name1);
-        if (convertStringToEnum(name1) == -1)
-            cout << "Invalid genre, try again." << endl;
-        else
-            /* 7. */ globalListOfDirectors->printDirectorOfGenres(globalListOfDirectors->root, name1);
-        system("pause");
-
-        break;
+        system("clear");
     }
-    case 8:
-    {
-        cout << "Enter movie name: ";
-        getchar();
-        getline(cin, name1);
-        /* 8. Direct Search */
-        m.PrintMovieDetails(name1);
-        system("pause");
-        break;
-    }
-    case 9:
-    {
-        cout << "Enter a keyword to deep search a movie: ";
-        getchar();
-        getline(cin, name1);
-        /*  Deep Search */
-        m.DeepSearchMovie(m.root, "flashdance");
-        system("pause");
-        break;
-    }
-    case 10:
-    {
-        /* 9. */ globalListOfYearWiseMovies->printFromYear(2013);
-
-        break;
-    }
-    case 11:
-    {
-        /* 10. b) */ globalListOfYearWiseMovies->printMoviesYearWiseDescending(globalListOfYearWiseMovies->start);
-
-        break;
-    }
-    case 12:
-    {
-        /* 10. a) */ globalListOfYearWiseMovies->printMoviesYearWise();
-        break;
-    }
-    case 13:
-    {
-        // /* 13. */   globalListOfRatingWiseMovies->printMoviesOfGenre("Action");
-
-        break;
-    }
-    case 14:
-    {
-        /* 12. */ globalListOfRatingWiseMovies->printMoviesRatingWise();
-        break;
-    }
-    case 0:
-    {
-        // exit here
-        break;
-    }
-    default:
-        cout << "Enter a valid input" << endl;
-        break;
-    }
-    system("cls");
-
-    // /* Print only names of all movies (Alphabetical) */m.PrintMovies(m.root);
 }
