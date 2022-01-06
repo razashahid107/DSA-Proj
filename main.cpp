@@ -877,7 +877,7 @@ void Actor::insertCoActor(Actor *coActor, Movie *movie)
             }
         }
         else
-        {   // co actor does not exist, ploc points to last co actor
+        { // co actor does not exist, ploc points to last co actor
             // insert movie and coactor
             CoActorNode *newCoActorNode = new CoActorNode;
             newCoActorNode->data = coActor;
@@ -1595,6 +1595,7 @@ int main()
             getchar();
             cin >> number;
             globalListOfYearWiseMovies->printFromYear(number);
+            cout << "The following movies of year " << number << " have been found.\nIf there is no movie, then nothing has been found.";
             break;
         }
         case 11:
@@ -1615,7 +1616,10 @@ int main()
             cout << "Enter Genre to Search for Movies: ";
             getchar();
             getline(cin, name1);
-            globalListOfRatingWiseMovies->printMoviesOfGenre(name1);
+            if (convertStringToEnum(name1) != -1)
+                globalListOfRatingWiseMovies->printMoviesOfGenre(name1);
+            else
+                cout << "Invalid Genre, try again.\nEnter any key to continue....";
             break;
         }
         case 14:
