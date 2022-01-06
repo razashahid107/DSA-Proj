@@ -468,7 +468,7 @@ void MovieTree::Parser()
 {
     int count = 0;
     ifstream inputFile;
-    inputFile.open(".//12 - Copy.csv");
+    inputFile.open(".//DataSet.csv");
     string line = "";
 
     /* global list of actors and directors is made */
