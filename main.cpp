@@ -877,8 +877,8 @@ void Actor::insertCoActor(Actor *coActor, Movie *movie)
             }
         }
         else
-        { // co actor does not exist, ploc points to last co actor
-          // insert movie and coactor
+        {   // co actor does not exist, ploc points to last co actor
+            // insert movie and coactor
             CoActorNode *newCoActorNode = new CoActorNode;
             newCoActorNode->data = coActor;
             ploc->next = newCoActorNode;
@@ -1463,7 +1463,8 @@ int main()
 
     // cout << "Time Taken: " << (clock() - start) / (double)CLOCKS_PER_SEC * 1000 << " milliseconds" << endl;
 
-    while (command != 0){
+    while (command != 0)
+    {
         // system("cls");
         system("clear");
         PrintInstructions();
@@ -1477,12 +1478,13 @@ int main()
             cout << "Enter the name of actor you want to search: ";
             getchar();
             getline(cin, name1);
-            // 1.  
-            if(globalListOfActors->SearchActor(name1)){
-                globalListOfActors->SearchActor(name1);
+            // 1.
+            if (globalListOfActors->SearchActor(name1))
+            {
                 globalListOfActors->loc->data.printActedMovies();
             }
-            else{
+            else
+            {
                 cout << "Which " << name1 << " you talking About?\n";
                 globalListOfActors->DeepSearchActor(globalListOfActors->root, name1);
             }
@@ -1504,8 +1506,10 @@ int main()
             getchar();
             getline(cin, name1);
             // 3.
-            globalListOfActors->SearchActor(name1);
-            globalListOfActors->loc->data.printUniqueCoActors();
+            if (globalListOfActors->SearchActor(name1))
+                globalListOfActors->loc->data.printUniqueCoActors();
+            else
+                cout << "The name you are searching for does not exist!! Try using deep Search.";
             cout << "Enter any key to proceed...   ";
             break;
         }
@@ -1515,8 +1519,10 @@ int main()
             getchar();
             getline(cin, name1);
             // 4.
-            globalListOfActors->SearchActor(name1);
-            globalListOfActors->loc->data.printCoActorsOfCoActors();
+            if (globalListOfActors->SearchActor(name1))
+                globalListOfActors->loc->data.printCoActorsOfCoActors();
+            else
+                cout << "The name you are searching for does not exist!! Try using deep Search.";
             cout << "Enter any key to proceed...   ";
             break;
         }
@@ -1527,11 +1533,14 @@ int main()
             getline(cin, name1);
 
             cout << "Enter name of second actor: ";
-            getchar();
             getline(cin, name2);
             // 5.
-            globalListOfActors->SearchActor(name1);
-            globalListOfActors->loc->data.checkCoActors(name2);
+            if (globalListOfActors->SearchActor(name1))
+            {
+                globalListOfActors->loc->data.checkCoActors(name2);
+            }
+            else
+                cout << "The name you are searching for does not exist!! Try using deep Search.";
             cout << "Enter any key to proceed...   ";
             break;
         }
@@ -1602,7 +1611,7 @@ int main()
         }
         case 13:
         {
-            // 13.  
+            // 13.
             cout << "Enter Genre to Search for Movies: ";
             getchar();
             getline(cin, name1);
