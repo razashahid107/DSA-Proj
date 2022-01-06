@@ -274,6 +274,8 @@ public:
     void insertSorted(Movie *newMovie);
     /* 10. a) Prints movie titles increasing year-wise */
     void printMoviesYearWise();
+    /* 10. b) Prints movie titles decreasing year-wise */
+    void printMoviesYearWiseDescending(IndexedNode *ptr);
     /* 9. Prints all movie titles released in the given year */
     void printFromYear(int year);
 };
@@ -467,7 +469,7 @@ void MovieTree::Parser()
 {
     int count = 0;
     ifstream inputFile;
-    inputFile.open(".//12.csv");
+    inputFile.open(".//12 - Copy.csv");
     string line = "";
 
     /* global list of actors and directors is made */
@@ -475,187 +477,193 @@ void MovieTree::Parser()
     // parsing of each row in data part of MovieNode i.e Movie
     while (getline(inputFile, line))
     {
-        MovieNode *tempMovie = new MovieNode();
-        stringstream inputString(line);
-        string tempString, tempString2; // temporary string to convert string to numeric data types
-        int tempInt;
-        getline(inputString, tempMovie->data.title, ',');
-
-        /* START: Genres are parsed
-        converted to their respective eNums
-        and stored in a dynamic array of int */
-
-        //  tempString is a string containing all genres
-        getline(inputString, tempString, ',');
-
-        /* we count '|' in tempString
-        sizeOfGenre = count+1 */
-        int countOfGenres = countCharInAString(tempString, '|') + 1;
-        string tempGenre;
-
-        // stringstream helps to separate genres using separator '|'
-        stringstream genreString(tempString);
-
-        // separation of genres, and storing them in eNums
-        for (int i = 0; i < countOfGenres; i++)
+        if (count != 0)
         {
-            if (i == countOfGenres - 1)
-                getline(genreString, tempString);
-            else
-                getline(genreString, tempString, '|');
-            // converting genre into its enum
-            tempInt = convertStringToEnum(tempString);
-            // storing each eNum in a linked list of int
-            tempMovie->data.insertGenreInMovie(tempInt);
-        }
-        // number of genres are also stored in Movie
-        /* END */
+            MovieNode *tempMovie = new MovieNode();
+            stringstream inputString(line);
+            // temporary string to convert string to numeric data types
+            string tempString, tempString2;
+            int tempInt;
+            getline(inputString, tempMovie->data.title, ',');
 
-        // converting year to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.year = atoi(tempString.c_str());
+            /* START: Genres are parsed
+            converted to their respective eNums
+            and stored in a dynamic array of int */
 
-        // converting imdbscore to float
-        getline(inputString, tempString, ',');
-        tempMovie->data.imdb_score = atof(tempString.c_str());
-
-        /* START: parsing of director into DirectorNode starts here */
-        getline(inputString, tempString, ',');
-        getline(inputString, tempString2, ',');
-        tempInt = atoi(tempString2.c_str());
-        /* search DirectorsList if name already exists
-        point director pointer to that node
-        also update MoviesDirected for that director
-
-        else
-        create a new node of DirectorNode type, insert it in DirectorTree
-        point director pointer to that data part of that node
-        update name, fb_likes, MoviesDirected for that director */
-
-        DirectorNode *tempDirectorNode;
-        /* inserting director in global list of directors without duplication */
-        tempDirectorNode = globalListOfDirectors->InsertDirector(tempString, tempInt);
-        // setting ptrToDir equal to its director
-        tempMovie->data.ptrToDir = &tempDirectorNode->data;
-        // adding movie nodes in director's directed movies
-        tempMovie->data.ptrToDir->insertDirectedMovies(&tempMovie->data);
-
-        // cout << "The director of " << tempMovie->data.ptrToDir->startOfList->data->title << " is " << tempMovie->data.ptrToDir->name << endl;
-        /* END: parsing of director ends here */
-
-        // converting crtic for views to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.num_critic_for_views = atoi(tempString.c_str());
-
-        // converting duration to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.duration = atoi(tempString.c_str());
-
-        /* START: parsing of actor into ActorNode starts here */
-        ActorNode *tempActorNode;
-        Actor *tempActor[3];
-
-        for (int i = 0; i < 3; i++)
-        {
+            //  tempString is a string containing all genres
             getline(inputString, tempString, ',');
 
-            // converting actor fb likes to int
+            /* we count '|' in tempString
+            sizeOfGenre = count+1 */
+            int countOfGenres = countCharInAString(tempString, '|') + 1;
+            string tempGenre;
+
+            // stringstream helps to separate genres using separator '|'
+            stringstream genreString(tempString);
+
+            // separation of genres, and storing them in eNums
+            for (int i = 0; i < countOfGenres; i++)
+            {
+                if (i == countOfGenres - 1)
+                    getline(genreString, tempString);
+                else
+                    getline(genreString, tempString, '|');
+                // converting genre into its enum
+                tempInt = convertStringToEnum(tempString);
+                // storing each eNum in a linked list of int
+                tempMovie->data.insertGenreInMovie(tempInt);
+            }
+            // number of genres are also stored in Movie
+            /* END */
+
+            // converting year to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.year = atoi(tempString.c_str());
+
+            // converting imdbscore to float
+            getline(inputString, tempString, ',');
+            tempMovie->data.imdb_score = atof(tempString.c_str());
+
+            /* START: parsing of director into DirectorNode starts here */
+            getline(inputString, tempString, ',');
             getline(inputString, tempString2, ',');
             tempInt = atoi(tempString2.c_str());
+            /* search DirectorsList if name already exists
+            point director pointer to that node
+            also update MoviesDirected for that director
 
-            /* create a new ActorsInMovie list that contains list of actors of this movie
-            parse name of actor1, and search it in global list of actors
-            if found, insert pointer of his node to ActorsInMovie
-            update moviesActedIn for that actor
-
-            if not found, insert a new node of Actor type in global list of actors
-            insert pointer of his node to ActorsInMovie
-            update actor name, fb likes, moviesActedIn for that actor */
-
-            /*  inserting actor in global list of actor, and storing its address in tempActorNode[i] */
-            tempActorNode = globalListOfActors->InsertActor(tempString, tempInt);
-
-            /* inserting actor in actor list of movie */
-            tempMovie->data.insertActorInMovie(&(tempActorNode->data));
-
-            /* inserting movie in actor's acted movies */
-            tempActorNode->data.insertActedMovies(&tempMovie->data);
-            // array of pointer to all 3 actors
-            tempActor[i] = &tempActorNode->data;
-        }
-        // inserting co actors of all 3 actors here
-        for (int i = 0; i < 3; i++)
-        {
-            tempActor[i]->insertCoActor(tempActor[(i + 1) % 3], &tempMovie->data);
-            tempActor[i]->insertCoActor(tempActor[(i + 2) % 3], &tempMovie->data);
-        }
-
-        /* END:  parsing of actor into ActorNode ends here */
-
-        // converting gross to long int
-        getline(inputString, tempString, ',');
-        tempMovie->data.gross = atol(tempString.c_str());
-
-        // converting num voted users to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.num_voted_users = atoi(tempString.c_str());
-
-        // converting cast_total_fb_likes to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.cast_total_fb_likes = atoi(tempString.c_str());
-
-        // converting facenumber_in_poster to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.facenumber_in_poster = atoi(tempString.c_str());
-
-        /* START: start of parsing of keywords */
-        getline(inputString, tempString, ',');
-        int countOfKeywords = countCharInAString(tempString, '|') + 1;
-        stringstream KeywordString(tempString);
-
-        for (int i = 0; i < countOfKeywords; i++)
-        {
-            if (i == countOfKeywords - 1)
-                getline(KeywordString, tempString);
             else
-                getline(KeywordString, tempString, '|');
-            tempMovie->data.insertKeywordInMovie(tempString);
+            create a new node of DirectorNode type, insert it in DirectorTree
+            point director pointer to that data part of that node
+            update name, fb_likes, MoviesDirected for that director */
+
+            DirectorNode *tempDirectorNode;
+            /* inserting director in global list of directors without duplication */
+            tempDirectorNode = globalListOfDirectors->InsertDirector(tempString, tempInt);
+            // setting ptrToDir equal to its director
+            tempMovie->data.ptrToDir = &tempDirectorNode->data;
+            // adding movie nodes in director's directed movies
+            tempMovie->data.ptrToDir->insertDirectedMovies(&tempMovie->data);
+
+            // cout << "The director of " << tempMovie->data.ptrToDir->startOfList->data->title << " is " << tempMovie->data.ptrToDir->name << endl;
+            /* END: parsing of director ends here */
+
+            // converting crtic for views to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.num_critic_for_views = atoi(tempString.c_str());
+
+            // converting duration to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.duration = atoi(tempString.c_str());
+
+            /* START: parsing of actor into ActorNode starts here */
+            ActorNode *tempActorNode;
+            Actor *tempActor[3];
+
+            for (int i = 0; i < 3; i++)
+            {
+                getline(inputString, tempString, ',');
+
+                // converting actor fb likes to int
+                getline(inputString, tempString2, ',');
+                tempInt = atoi(tempString2.c_str());
+
+                /* create a new ActorsInMovie list that contains list of actors of this movie
+                parse name of actor1, and search it in global list of actors
+                if found, insert pointer of his node to ActorsInMovie
+                update moviesActedIn for that actor
+
+                if not found, insert a new node of Actor type in global list of actors
+                insert pointer of his node to ActorsInMovie
+                update actor name, fb likes, moviesActedIn for that actor */
+
+                /*  inserting actor in global list of actor, and storing its address in tempActorNode[i] */
+                tempActorNode = globalListOfActors->InsertActor(tempString, tempInt);
+
+                /* inserting actor in actor list of movie */
+                tempMovie->data.insertActorInMovie(&(tempActorNode->data));
+
+                /* inserting movie in actor's acted movies */
+                tempActorNode->data.insertActedMovies(&tempMovie->data);
+                // array of pointer to all 3 actors
+                tempActor[i] = &tempActorNode->data;
+            }
+            // inserting co actors of all 3 actors here
+            for (int i = 0; i < 3; i++)
+            {
+                tempActor[i]->insertCoActor(tempActor[(i + 1) % 3], &tempMovie->data);
+                tempActor[i]->insertCoActor(tempActor[(i + 2) % 3], &tempMovie->data);
+            }
+
+            /* END:  parsing of actor into ActorNode ends here */
+
+            // converting gross to long int
+            getline(inputString, tempString, ',');
+            tempMovie->data.gross = atol(tempString.c_str());
+
+            // converting num voted users to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.num_voted_users = atoi(tempString.c_str());
+
+            // converting cast_total_fb_likes to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.cast_total_fb_likes = atoi(tempString.c_str());
+
+            // converting facenumber_in_poster to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.facenumber_in_poster = atoi(tempString.c_str());
+
+            /* START: start of parsing of keywords */
+            getline(inputString, tempString, ',');
+            int countOfKeywords = countCharInAString(tempString, '|') + 1;
+            stringstream KeywordString(tempString);
+
+            for (int i = 0; i < countOfKeywords; i++)
+            {
+                if (i == countOfKeywords - 1)
+                    getline(KeywordString, tempString);
+                else
+                    getline(KeywordString, tempString, '|');
+                tempMovie->data.insertKeywordInMovie(tempString);
+            }
+            /* END: end of parsing of keywords */
+
+            getline(inputString, tempMovie->data.imdb_link, ',');
+
+            // converting num_user_reviews to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.num_user_reviews = atoi(tempString.c_str());
+
+            getline(inputString, tempMovie->data.language, ',');
+            getline(inputString, tempMovie->data.country, ',');
+            getline(inputString, tempMovie->data.content_rating, ',');
+
+            // converting budget to long int
+            getline(inputString, tempString, ',');
+            tempMovie->data.budget = atol(tempString.c_str());
+
+            // converting aspect_ratio to float
+            getline(inputString, tempString, ',');
+            tempMovie->data.aspect_ratio = atof(tempString.c_str());
+
+            // converting movie_fb_likes to int
+            getline(inputString, tempString, ',');
+            tempMovie->data.movie_fb_likes = atoi(tempString.c_str());
+
+            getline(inputString, tempString, ',');
+            tempMovie->data.color = (tempString == "Color") ? true : false;
+
+            count++;
+
+            // inserting MovieNode in MovieTree
+            InsertMovie(tempMovie);
+            // inserting address of Movie in an Year Wise index
+            globalListOfYearWiseMovies->insertSorted(&tempMovie->data);
+            // inserting address of Movie in a Rating Wise index
+            globalListOfRatingWiseMovies->insertSorted(&tempMovie->data);
         }
-        /* END: end of parsing of keywords */
-
-        getline(inputString, tempMovie->data.imdb_link, ',');
-
-        // converting num_user_reviews to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.num_user_reviews = atoi(tempString.c_str());
-
-        getline(inputString, tempMovie->data.language, ',');
-        getline(inputString, tempMovie->data.country, ',');
-        getline(inputString, tempMovie->data.content_rating, ',');
-
-        // converting budget to long int
-        getline(inputString, tempString, ',');
-        tempMovie->data.budget = atol(tempString.c_str());
-
-        // converting aspect_ratio to float
-        getline(inputString, tempString, ',');
-        tempMovie->data.aspect_ratio = atof(tempString.c_str());
-
-        // converting movie_fb_likes to int
-        getline(inputString, tempString, ',');
-        tempMovie->data.movie_fb_likes = atoi(tempString.c_str());
-
-        getline(inputString, tempString, ',');
-        tempMovie->data.color = (tempString == "Color") ? true : false;
-
-        count++;
-
-        // inserting MovieNode in MovieTree
-        InsertMovie(tempMovie);
-        // inserting address of Movie in an Year Wise index
-        globalListOfYearWiseMovies->insertSorted(&tempMovie->data);
-        // inserting address of Movie in a Rating Wise index
-        globalListOfRatingWiseMovies->insertSorted(&tempMovie->data);
+        else
+            count++;
     }
 }
 void MovieTree::InsertMovie(MovieNode *tempMovie)
@@ -887,12 +895,13 @@ void Actor::printUniqueCoActors()
     cout << "Co-Actors of " << name << " are:" << endl;
     while (loc != NULL)
     {
-        cout << loc->data->name << endl
-             << "The common movies are: " << endl;
+        cout << loc->data->name << " in ";
         MoviesActedIn *movieLoc = loc->startOfListOfCommonMovies;
         while (movieLoc != NULL)
         {
-            cout << movieLoc->data->title << endl;
+            if (movieLoc != loc->startOfListOfCommonMovies)
+                cout << " | ";
+            cout << movieLoc->data->title;
             movieLoc = movieLoc->next;
         }
         cout << endl;
@@ -1184,6 +1193,17 @@ void YearWiseList::printMoviesYearWise()
         loc = loc->next;
     }
 }
+void YearWiseList::printMoviesYearWiseDescending(IndexedNode *ptr)
+{
+    if (ptr == NULL)
+        return;
+    printMoviesYearWiseDescending(ptr->next);
+    if (ptr->data->year == 0)
+        cout << "Year: NOT IN RECORD Title: " << ptr->data->title << endl;
+    else
+        cout << "Year: " << ptr->data->year << " Title: " << ptr->data->title << endl;
+}
+
 void YearWiseList::printFromYear(int year)
 {
     loc = start;
@@ -1403,47 +1423,190 @@ int countCharInAString(string line, char c)
     return count;
 }
 
+void PrintInstructions()
+{
+    cout << "WELCOME TO IMDB" << endl
+         << endl
+         << "Enter the a number to search the following " << endl
+         << endl
+         << "1. Search profile of an Actor." << endl
+         << "2. Deep search an actor." << endl
+         << "3. Search Co Actors of an Actor and the Movies in which both acted." << endl
+         << "4. Print a list of all coactors of the coactors of an actor." << endl
+         << "5. Check of two Actors are Co Actors." << endl
+         << endl
+         << "6. Search profile of a Director." << endl
+         << "7. Search Directors of a specific Genre." << endl
+         << endl
+         << "8. Search a Movie." << endl
+         << "9. Deep search a Movie." << endl
+         << "10. Search Movies released in a specific year." << endl
+         << "11. Search latest Movies." << endl
+         << "12. Search oldest Movies." << endl
+         << "13. Search all Movies of a specific Genre." << endl
+         << "14. Search Top-Rated Movies." << endl
+         << endl
+         << "Enter 0 to exit." << endl
+         << endl
+         << "Your input: ";
+}
+
 int main()
 {
     srand(time(0));
-    MovieTree m;
-    m.Parser();
     time_t start = clock();
-    cout << "Time Taken: " << (clock() - start) / (double)CLOCKS_PER_SEC * 1000 << " milliseconds" << endl;
+    MovieTree m;
+    int command;
+    string name1, name2;
+    m.Parser();
 
-    string actor = "Tom Cruise";
+    // cout << "Time Taken: " << (clock() - start) / (double)CLOCKS_PER_SEC * 1000 << " milliseconds" << endl;
 
-    // /* 1. */ globalListOfActors->SearchActor(actor);
-    // globalListOfActors->loc->data.printActedMovies();
+    PrintInstructions();
+    cin >> command;
+    system("cls");
+    switch (command)
+    {
+    case 1:
+    {
+        cout << "Enter the name of actor you want to search: ";
+        getchar();
+        getline(cin, name1);
+        /* 1. */ globalListOfActors->SearchActor(name1);
+        globalListOfActors->loc->data.printActedMovies();
+        cout << "Enter any key to proceed...   ";
+        system("pause");
+        break;
+    }
+    case 2:
+    {
+        cout << "Enter the name of actor you want to DEEP search: ";
+        getchar();
+        getline(cin, name1);
+        globalListOfActors->DeepSearchActor(globalListOfActors->root, name1);
+        cout << "Enter any key to proceed...   ";
+        system("pause");
+        break;
+    }
+    case 3:
+    {
+        cout << "Enter the name of Actor whose Co Actors you want to search: ";
+        getchar();
+        getline(cin, name1);
+        /* 3. */ globalListOfActors->SearchActor(name1);
+        globalListOfActors->loc->data.printUniqueCoActors();
+        cout << "Enter any key to proceed...   ";
+        system("pause");
+        break;
+    }
+    case 4:
+    {
+        cout << "Enter the name of Actor whose Co-Co Actors you want to search: ";
+        getchar();
+        getline(cin, name1);
+        /* 4. */ globalListOfActors->SearchActor(name1);
+        globalListOfActors->loc->data.printCoActorsOfCoActors();
+        cout << "Enter any key to proceed...   ";
+        system("pause");
+        break;
+    }
+    case 5:
+    {
+        cout << "Enter name of first actor: ";
+        getline(cin, name1);
 
-    // /* 3. */ globalListOfActors->SearchActor(actor);
-    // globalListOfActors->loc->data.printUniqueCoActors();
+        cout << "Enter name of second actor: ";
+        getline(cin, name2);
+        /* 5. */ globalListOfActors->SearchActor(name1);
+        globalListOfActors->loc->data.checkCoActors(name2);
+        cout << "Enter any key to proceed...   ";
+        system("pause");
+        break;
+    }
+    case 6:
+    {
+        cout << "Enter the name of Director you want to search: ";
+        getchar();
+        getline(cin, name1);
+        /* 6. */ if (globalListOfDirectors->SearchDirector(name1))
+            globalListOfDirectors->loc->data.printDirectedMovies();
+        else
+            cout << "Director does not exist, try searching again.\n";
+        system("pause");
 
-    // /* 4. */ globalListOfActors->SearchActor(actor);
-    // globalListOfActors->loc->data.printCoActorsOfCoActors();
+        break;
+    }
+    case 7:
+    {
+        cout << "Enter a Genre: ";
+        getchar();
+        getline(cin, name1);
+        if (convertStringToEnum(name1) == -1)
+            cout << "Invalid genre, try again." << endl;
+        else
+            /* 7. */ globalListOfDirectors->printDirectorOfGenres(globalListOfDirectors->root, name1);
+        system("pause");
 
-    // /* 5. */ globalListOfActors->SearchActor(actor);
-    // globalListOfActors->loc->data.checkCoActors("Emma Stone");
+        break;
+    }
+    case 8:
+    {
+        cout << "Enter movie name: ";
+        getchar();
+        getline(cin, name1);
+        /* 8. Direct Search */
+        m.PrintMovieDetails(name1);
+        system("pause");
+        break;
+    }
+    case 9:
+    {
+        cout << "Enter a keyword to deep search a movie: ";
+        getchar();
+        getline(cin, name1);
+        /*  Deep Search */
+        m.DeepSearchMovie(m.root, "flashdance");
+        system("pause");
+        break;
+    }
+    case 10:
+    {
+        /* 9. */ globalListOfYearWiseMovies->printFromYear(2013);
 
-    // /* 6. */ globalListOfDirectors->SearchDirector("Simon West");
-    // globalListOfDirectors->loc->data.printDirectedMovies();
+        break;
+    }
+    case 11:
+    {
+        /* 10. b) */ globalListOfYearWiseMovies->printMoviesYearWiseDescending(globalListOfYearWiseMovies->start);
 
-    // /* 7. */ globalListOfDirectors->printDirectorOfGenres(globalListOfDirectors->root, "Family");
+        break;
+    }
+    case 12:
+    {
+        /* 10. a) */ globalListOfYearWiseMovies->printMoviesYearWise();
+        break;
+    }
+    case 13:
+    {
+        // /* 13. */   globalListOfRatingWiseMovies->printMoviesOfGenre("Action");
 
-    /* 8. Deep Search */
-    // m.DeepSearchMovie(m.root, "sex");
-    /* 8. Direct Search */
-    m.PrintMovieDetails("flashdance");
+        break;
+    }
+    case 14:
+    {
+        /* 12. */ globalListOfRatingWiseMovies->printMoviesRatingWise();
+        break;
+    }
+    case 0:
+    {
+        // exit here
+        break;
+    }
+    default:
+        cout << "Enter a valid input" << endl;
+        break;
+    }
+    system("cls");
 
     // /* Print only names of all movies (Alphabetical) */m.PrintMovies(m.root);
-    /* print genre of a movie */ // tempMovie->data.printGenresOfMovie();
-    // /* deep search an actor */globalListOfActors->DeepSearchActor(globalListOfActors->root, "lund");
-
-    // /* 9. */  globalListOfYearWiseMovies->printFromYear(2013);
-
-    // /* 10. a) */ globalListOfYearWiseMovies->printMoviesYearWise();
-
-    // /* 12. */ globalListOfRatingWiseMovies->printMoviesRatingWise();
-
-    // /* 13. */   globalListOfRatingWiseMovies->printMoviesOfGenre("Action");
 }
